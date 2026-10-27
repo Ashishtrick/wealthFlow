@@ -227,7 +227,7 @@
             </div>
             <div>
               <h2 class="text-lg sm:text-xl font-bold leading-tight">Can I Afford It?</h2>
-              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluate purchases based on your liquidity and localized interest rates.</p>
+              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluate target purchases based on actual liquidity and custom interest rates.</p>
             </div>
           </div>
 
@@ -265,7 +265,6 @@
                           <span class="text-slate-400">%</span>
                       </div>
                   </div>
-                  <p class="text-[10px] text-slate-500 mt-1" id="rateHint">Typical rate applied based on currency.</p>
               </div>
 
               <button id="calculateAffordabilityBtn" class="w-full py-3.5 sm:py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2 mt-2">
@@ -595,13 +594,12 @@
     function getCurrencyConfig() {
         return currentCurrency === 'JPY' 
             ? { locale: 'ja-JP', curr: 'JPY', symbol: '¥', label: '¥ JPY', fallbackK: 'k', defaultRate: 3.5 }
-            : { locale: 'en-IN', curr: 'INR', symbol: '₹', label: '₹ INR', fallbackK: 'k', defaultRate: 10.5 }; // INR loans are typically 9-12%
+            : { locale: 'en-IN', curr: 'INR', symbol: '₹', label: '₹ INR', fallbackK: 'k', defaultRate: 10.5 };
     }
 
     function formatCurrency(val) {
         const conf = getCurrencyConfig();
-        return new Intl.NumberFormat(conf.locale, { style: 'currency', currency: 'curr', maximumFractionDigits: 0 })
-                   .format(val).replace(conf.curr, conf.symbol);
+        return new Intl.NumberFormat(conf.locale, { style: 'currency', currency: conf.curr, maximumFractionDigits: 0 }).format(val);
     }
     
     function formatCurrencyShort(val) {
@@ -710,7 +708,6 @@
     });
 
     // --- Data Store ---
-    // Added b5 to schema. Older data will map undefined b5 to 0.
     const initialPortfolioData = [
       { date: '2026-05-31', b1: 154956, b2: 21626, b3: 10876.2, b4: 20190, b5: 0, liability: 594082 },
       { date: '2026-06-30', b1: 254956, b2: 31834, b3: 22004.8, b4: 23601, b5: 0, liability: 594082 },
@@ -736,8 +733,26 @@
       { month: '2026-10', type: 'salary', net: 270899 }
     ];
 
-    let portfolio = localStorage.getItem('wealthflow_portfolio_v4') ? JSON.parse(localStorage.getItem('wealthflow_portfolio_v4')) : initialPortfolioData;
-    let incomeLog = localStorage.getItem('wealthflow_income_v4') ? JSON.parse(localStorage.getItem('wealthflow_income_v4')) : initialIncomeData;
+    function loadSavedPortfolio() {
+        const saved = localStorage.getItem('wealthflow_portfolio_v6');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+        return [...initialPortfolioData];
+    }
+
+    function loadSavedIncome() {
+        const saved = localStorage.getItem('wealthflow_income_v6');
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+        return [...initialIncomeData];
+    }
+
+    let portfolio = loadSavedPortfolio();
+    let incomeLog = loadSavedIncome();
 
     // Wipe Modal Handlers
     document.getElementById('wipeDataBtn').addEventListener('click', () => { document.getElementById('wipeModal').classList.remove('hidden'); });
@@ -745,15 +760,13 @@
     document.getElementById('confirmWipeBtn').addEventListener('click', () => {
         portfolio = [];
         incomeLog = [];
-        localStorage.setItem('wealthflow_portfolio_v4', JSON.stringify(portfolio));
-        localStorage.setItem('wealthflow_income_v4', JSON.stringify(incomeLog));
-        
+        localStorage.setItem('wealthflow_portfolio_v6', JSON.stringify(portfolio));
+        localStorage.setItem('wealthflow_income_v6', JSON.stringify(incomeLog));
         document.getElementById('wipeModal').classList.add('hidden');
         renderDashboard();
         renderIncomeDashboard();
         document.getElementById('affordabilityResult').innerHTML = '<div class="text-slate-500 text-sm text-center py-10">Add portfolio data first to use the calculator.</div>';
     });
-
 
     let growthChartInstance = null;
     let allocationChartInstance = null;
@@ -761,10 +774,15 @@
     let yoyChartInstance = null;
 
     function calculateMetrics(entry) {
-      const b5 = entry.b5 || 0;
-      const totalAssets = entry.b1 + entry.b2 + entry.b3 + entry.b4 + b5;
-      const netWealth = totalAssets - entry.liability;
-      return { totalAssets, netWealth, b5 };
+      const b1 = Number(entry.b1 ?? entry.emergency ?? 0);
+      const b2 = Number(entry.b2 ?? entry.nisa ?? 0);
+      const b3 = Number(entry.b3 ?? entry.esop ?? 0);
+      const b4 = Number(entry.b4 ?? entry.dc ?? 0);
+      const b5 = Number(entry.b5 ?? 0);
+      const liability = Number(entry.liability ?? 0);
+      const totalAssets = b1 + b2 + b3 + b4 + b5;
+      const netWealth = totalAssets - liability;
+      return { totalAssets, netWealth, b1, b2, b3, b4, b5, liability };
     }
 
     function renderDashboard() {
@@ -793,7 +811,7 @@
       }
 
       portfolio.sort((a, b) => new Date(a.date) - new Date(b.date));
-      localStorage.setItem('wealthflow_portfolio_v4', JSON.stringify(portfolio));
+      localStorage.setItem('wealthflow_portfolio_v6', JSON.stringify(portfolio));
 
       const latest = portfolio[portfolio.length - 1];
       const prev = portfolio.length > 1 ? portfolio[portfolio.length - 2] : latest;
@@ -802,26 +820,26 @@
 
       document.getElementById('kpiNetWealth').textContent = formatCurrencyShort(latestMetrics.netWealth);
       document.getElementById('kpiTotalAssets').textContent = formatCurrencyShort(latestMetrics.totalAssets);
-      document.getElementById('kpiPendingDebt').textContent = formatCurrencyShort(latest.liability);
-      document.getElementById('kpiEmergencyFund').textContent = formatCurrencyShort(latest.b1);
+      document.getElementById('kpiPendingDebt').textContent = formatCurrencyShort(latestMetrics.liability);
+      document.getElementById('kpiEmergencyFund').textContent = formatCurrencyShort(latestMetrics.b1);
       const mobElem = document.getElementById('kpiEmergencyFundMobile');
-      if(mobElem) mobElem.textContent = formatCurrencyShort(latest.b1);
+      if(mobElem) mobElem.textContent = formatCurrencyShort(latestMetrics.b1);
 
       const netWealthDiff = latestMetrics.netWealth - prevMetrics.netWealth;
       const growthEl = document.getElementById('kpiNetWealthGrowth');
       if (netWealthDiff >= 0) {
         growthEl.className = "mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> +${formatCurrencyShort(netWealthDiff)} since last record`;
+        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> +${formatCurrencyShort(netWealthDiff)} since last record`;
       } else {
         growthEl.className = "mt-1 text-[10px] sm:text-xs text-rose-600 dark:text-rose-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> ${formatCurrencyShort(netWealthDiff)} since last record`;
+        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3.5 h-3.5 mr-0.5"></i> ${formatCurrencyShort(netWealthDiff)} since last record`;
       }
       
       // Update Debt Advisor
-      if(latest.liability > 0) {
+      if(latestMetrics.liability > 0) {
           document.getElementById('debtAdvisorSection').classList.remove('hidden');
-          document.getElementById('debtAdvisorAmount').textContent = formatCurrency(latest.liability);
-          updateDebtAdvisor(latest.liability);
+          document.getElementById('debtAdvisorAmount').textContent = formatCurrency(latestMetrics.liability);
+          updateDebtAdvisor(latestMetrics.liability);
       } else {
           document.getElementById('debtAdvisorSection').classList.add('hidden');
       }
@@ -833,13 +851,13 @@
         tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition cursor-default";
         tr.innerHTML = `
           <td class="p-3.5 font-semibold whitespace-nowrap">${row.date}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b1)}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b2)}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b3)}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b4)}</td>
-          ${b.hasB5 ? `<td class="p-3.5 whitespace-nowrap text-emerald-600 dark:text-emerald-400">${formatCurrency(row.b5 || 0)}</td>` : ''}
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b1)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b2)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b3)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b4)}</td>
+          ${b.hasB5 ? `<td class="p-3.5 whitespace-nowrap text-emerald-600 dark:text-emerald-400">${formatCurrency(m.b5)}</td>` : ''}
           <td class="p-3.5 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap bg-slate-50 dark:bg-slate-800/50">${formatCurrency(m.totalAssets)}</td>
-          <td class="p-3.5 font-medium text-rose-500 whitespace-nowrap">${formatCurrency(row.liability)}</td>
+          <td class="p-3.5 font-medium text-rose-500 whitespace-nowrap">${formatCurrency(m.liability)}</td>
           <td class="p-3.5 font-bold ${m.netWealth >= 0 ? 'text-emerald-600' : 'text-amber-500'} whitespace-nowrap">${formatCurrency(m.netWealth)}</td>
           <td class="p-3.5 text-center">
             <button onclick="deleteEntry(${actualIdx})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition active:scale-95"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -855,12 +873,11 @@
     // Debt Advisor Calculation
     function updateDebtAdvisor(liability) {
         const rate = parseFloat(document.getElementById('debtInterestRate').value) || (currentCurrency === 'JPY' ? 3.5 : 10.5);
-        const monthlyRate = (rate / 100) / 12;
         
         // Strategy 1: Lump sum 10% prepayment from bonus
         const lumpSum = liability * 0.10;
         // Approximation of interest saved over 5 years
-        const approxInterestSaved = lumpSum * rate/100 * 5; 
+        const approxInterestSaved = lumpSum * (rate/100) * 4.5; 
         
         document.getElementById('debtStrategy1Amount').textContent = `Pay ${formatCurrencyShort(lumpSum)} from Bonus`;
         document.getElementById('debtStrategy1Savings').textContent = `Saves ~${formatCurrencyShort(approxInterestSaved)} in interest`;
@@ -875,7 +892,7 @@
     }
     
     document.getElementById('debtInterestRate').addEventListener('input', () => {
-        if(portfolio.length > 0) updateDebtAdvisor(portfolio[portfolio.length-1].liability);
+        if(portfolio.length > 0) updateDebtAdvisor(calculateMetrics(portfolio[portfolio.length-1]).liability);
     });
 
     function renderCharts(latest) {
@@ -887,10 +904,10 @@
       const dates = portfolio.map(e => isMobile ? e.date.substring(5) : e.date);
       const netWealths = portfolio.map(e => calculateMetrics(e).netWealth);
       const totalAssets = portfolio.map(e => calculateMetrics(e).totalAssets);
-      const liabilities = portfolio.map(e => e.liability);
+      const liabilities = portfolio.map(e => calculateMetrics(e).liability);
       
-      const conf = getCurrencyConfig();
       const b = getBuckets();
+      const lm = calculateMetrics(latest);
 
       Chart.defaults.font.size = isMobile ? 10 : 12;
       Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
@@ -933,7 +950,7 @@
       const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
       if (allocationChartInstance) allocationChartInstance.destroy();
       
-      const allocData = b.hasB5 ? [latest.b1, latest.b2, latest.b3, latest.b4, latest.b5 || 0] : [latest.b1, latest.b2, latest.b3, latest.b4];
+      const allocData = b.hasB5 ? [lm.b1, lm.b2, lm.b3, lm.b4, lm.b5] : [lm.b1, lm.b2, lm.b3, lm.b4];
       const allocLabels = b.hasB5 ? [b.b1, b.b2, b.b3, b.b4, b.b5] : [b.b1, b.b2, b.b3, b.b4];
       const allocColors = b.hasB5 ? ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'] : ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
       
@@ -946,7 +963,7 @@
           });
           document.getElementById('allocationLegend').innerHTML = allocLabels.map((lbl, idx) => `<div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span><div class="flex flex-col"><span class="text-slate-500 font-medium truncate max-w-[80px]" title="${lbl}">${lbl}</span><span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span></div></div>`).join('');
       } else {
-          document.getElementById('allocationChartContainer').innerHTML = '<div class="text-slate-400 text-sm">Assets are ' + conf.symbol + '0</div>';
+          document.getElementById('allocationChartContainer').innerHTML = '<div class="text-slate-400 text-sm">Assets are 0</div>';
       }
     }
 
@@ -975,7 +992,7 @@
       }
 
       incomeLog.sort((a, b) => new Date(a.month) - new Date(b.month));
-      localStorage.setItem('wealthflow_income_v4', JSON.stringify(incomeLog));
+      localStorage.setItem('wealthflow_income_v6', JSON.stringify(incomeLog));
 
       const salaries = incomeLog.filter(i => i.type === 'salary');
       const bonuses = incomeLog.filter(i => i.type === 'bonus');
@@ -1254,7 +1271,7 @@
         const latest = portfolio[portfolio.length - 1];
         const lm = calculateMetrics(latest);
         
-        // Use latest saved cash or check if anything entered
+        // Use latest saved cash or check if anything entered in form manually
         const formCashVal = parseFloat(document.getElementById('formB1')?.value);
         const currentCash = (!isNaN(formCashVal) && formCashVal > 0) ? formCashVal : lm.b1;
         
@@ -1461,7 +1478,6 @@
         if(window.innerWidth < 1024) document.getElementById('affordabilityResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
-    // Dark Mode
     const initializeTheme = () => {
         const savedTheme = localStorage.getItem('wealthflow_theme');
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark'); }
@@ -1483,8 +1499,26 @@
       updateThemeIcon();
     });
 
-    // Initialize
-    updateCurrencyLabels(); 
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      const b = getBuckets();
+      let csv = `YYYY/MM/DD,${b.b1},${b.b2},${b.b3},${b.b4}${b.hasB5 ? ',' + b.b5 : ''},liability/pending,Total Assets,Total Net Wealth\n`;
+      portfolio.forEach(row => {
+        const m = calculateMetrics(row);
+        csv += `${row.date},${m.b1},${m.b2},${m.b3},${m.b4}${b.hasB5 ? ',' + m.b5 : ''},${m.liability},${m.totalAssets},${m.netWealth}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `WealthFlow_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Initialize UI
+    updateCurrencyLabels();
     initializeTheme();
     document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
     const d = new Date(); document.getElementById('formIncDate').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
