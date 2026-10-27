@@ -1,9 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>WealthFlow | Personal Investment & Affordability Suite</title>
+  
+  <!-- Add Web App Manifest and Apple Touch Icon support for better mobile "Add to Home Screen" experience -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f172a">
+  
   <!-- Tailwind CSS & Lucide Icons & Chart.js -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -23,7 +30,7 @@
   </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
     .glass-card {
       background: rgba(255, 255, 255, 0.88);
       backdrop-filter: blur(12px);
@@ -34,152 +41,183 @@
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+    
+    /* Custom Scrollbar for mobile tables */
+    .table-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.05);
+        border-radius: 4px;
+    }
+    .dark .table-scroll::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.05);
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+        background: rgba(0,0,0,0.2);
+        border-radius: 4px;
+    }
+    .dark .table-scroll::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+    }
+    
+    /* Ensure inputs don't zoom in on iOS Safari */
+    input[type="text"], input[type="number"], input[type="date"], select {
+        font-size: 16px !important;
+    }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200">
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 pb-16 sm:pb-8">
 
   <!-- Navigation / Top Bar -->
   <header class="glass-card sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
-          <i data-lucide="trending-up" class="w-5 h-5"></i>
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 flex-shrink-0">
+          <i data-lucide="trending-up" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight">WealthFlow</h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Portfolio Tracker & Purchase Advisor</p>
+        <div class="truncate">
+          <h1 class="text-base sm:text-lg font-bold tracking-tight truncate">WealthFlow</h1>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">Portfolio & Purchase Advisor</p>
         </div>
       </div>
 
-      <div class="flex items-center space-x-3">
-        <div class="hidden sm:flex items-center text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-          <i data-lucide="bell-ring" class="w-3.5 h-3.5 mr-1.5 animate-pulse"></i> Next Sheet Update: 30th
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <div class="hidden md:flex items-center text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+          <i data-lucide="bell-ring" class="w-3.5 h-3.5 mr-1.5 animate-pulse"></i> Next Update: 30th
         </div>
-        <button id="themeToggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+        <button id="themeToggle" class="p-2 sm:p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" aria-label="Toggle Dark Mode">
           <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
 
-    <!-- KPI Summary Row -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-      <div class="glass-card rounded-2xl p-5 shadow-sm">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+    <!-- KPI Summary Row - Optimized for Mobile Grid -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
           <span>Net Wealth</span>
-          <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="shield-check" class="w-4 h-4"></i></span>
+          <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="shield-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
         </div>
-        <div class="mt-3 text-2xl font-bold" id="kpiNetWealth">¥0</div>
-        <div class="mt-1 text-xs text-emerald-600 dark:text-emerald-400 flex items-center" id="kpiNetWealthGrowth">
-          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> Positive Trajectory
+        <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiNetWealth">¥0</div>
+        <div class="mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center" id="kpiNetWealthGrowth">
+          <i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> Positive Trajectory
         </div>
       </div>
 
-      <div class="glass-card rounded-2xl p-5 shadow-sm">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
-          <span>Total Liquid & Invested</span>
-          <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600"><i data-lucide="pie-chart" class="w-4 h-4"></i></span>
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+          <span class="truncate pr-1">Total Assets</span>
+          <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 flex-shrink-0"><i data-lucide="pie-chart" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
         </div>
-        <div class="mt-3 text-2xl font-bold" id="kpiTotalAssets">¥0</div>
-        <div class="mt-1 text-xs text-slate-500">Cash, NISA, ESOP & DC Pension</div>
+        <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiTotalAssets">¥0</div>
+        <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate">Cash, NISA, ESOP, DC</div>
       </div>
 
-      <div class="glass-card rounded-2xl p-5 shadow-sm">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
-          <span>Pending Liabilities</span>
-          <span class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600"><i data-lucide="arrow-down-circle" class="w-4 h-4"></i></span>
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+          <span class="truncate pr-1">Liabilities</span>
+          <span class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600 flex-shrink-0"><i data-lucide="arrow-down-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
         </div>
-        <div class="mt-3 text-2xl font-bold text-rose-600 dark:text-rose-400" id="kpiPendingDebt">¥0</div>
-        <div class="mt-1 text-xs text-slate-500">Remaining loan balance</div>
+        <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400" id="kpiPendingDebt">¥0</div>
+        <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate">Loan balance</div>
       </div>
-
-      <div class="glass-card rounded-2xl p-5 shadow-sm">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+      
+      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1 hidden lg:block">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
           <span>Emergency Reserve</span>
-          <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-4 h-4"></i></span>
+          <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
         </div>
-        <div class="mt-3 text-2xl font-bold" id="kpiEmergencyFund">¥0</div>
-        <div class="mt-1 text-xs text-slate-500" id="kpiEmergencyRunway">Available immediate cash</div>
+        <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiEmergencyFund">¥0</div>
+        <div class="mt-1 text-[10px] sm:text-xs text-slate-500">Available immediate cash</div>
       </div>
     </section>
 
+    <!-- Mobile-only Emergency Fund Card (Visible only on small screens for better layout) -->
+    <section class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm lg:hidden">
+      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+        <span>Emergency Reserve (Cash)</span>
+        <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5"></i></span>
+      </div>
+      <div class="mt-2 text-xl font-bold" id="kpiEmergencyFundMobile">¥0</div>
+    </section>
+
     <!-- Charts Section -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="glass-card rounded-2xl p-6 shadow-sm lg:col-span-2">
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+      <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm lg:col-span-2">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="text-base font-bold">Net Wealth & Growth Progression</h2>
-            <p class="text-xs text-slate-500">Historical trend from your recorded entries</p>
+            <h2 class="text-sm sm:text-base font-bold">Net Wealth Progression</h2>
           </div>
-          <span class="text-xs font-medium px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Monthly</span>
+          <span class="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Monthly</span>
         </div>
-        <div class="h-72">
+        <div class="h-60 sm:h-72 w-full">
           <canvas id="growthChart"></canvas>
         </div>
       </div>
 
-      <div class="glass-card rounded-2xl p-6 shadow-sm">
+      <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h2 class="text-base font-bold">Asset Allocation</h2>
-            <p class="text-xs text-slate-500">Latest distribution snapshot</p>
+            <h2 class="text-sm sm:text-base font-bold">Asset Allocation</h2>
           </div>
         </div>
-        <div class="h-64 flex items-center justify-center">
+        <div class="h-48 sm:h-64 flex items-center justify-center">
           <canvas id="allocationChart"></canvas>
         </div>
-        <div id="allocationLegend" class="grid grid-cols-2 gap-2 mt-2 text-xs"></div>
+        <div id="allocationLegend" class="grid grid-cols-2 gap-2 mt-4 text-[10px] sm:text-xs"></div>
       </div>
     </section>
 
     <!-- Affordability & Loan/Cash Advisor Section -->
-    <section class="glass-card rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-500/20 bg-gradient-to-br from-white via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20">
-      <div class="flex items-center space-x-3 mb-6">
-        <div class="p-2.5 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25">
-          <i data-lucide="sparkles" class="w-6 h-6"></i>
+    <section class="glass-card rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm border border-emerald-500/20 bg-gradient-to-br from-white via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20">
+      <div class="flex items-start sm:items-center space-x-3 mb-5 sm:mb-6">
+        <div class="p-2 sm:p-2.5 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25 flex-shrink-0 mt-1 sm:mt-0">
+          <i data-lucide="sparkles" class="w-5 h-5 sm:w-6 sm:h-6"></i>
         </div>
         <div>
-          <h2 class="text-xl font-bold">Can I Afford It? (Purchase & Loan Advisor)</h2>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Evaluate any target purchase (smartphone, bike, marriage, home) against your actual cash reserves, pending debt, and monthly surplus.</p>
+          <h2 class="text-lg sm:text-xl font-bold leading-tight">Can I Afford It?</h2>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluate purchases against your actual liquidity.</p>
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         <!-- Input Form -->
         <div class="lg:col-span-5 space-y-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">What do you want to acquire or fund?</label>
-            <input type="text" id="targetItemName" placeholder="e.g., iPhone 16 Pro, Royal Enfield Bike, Marriage, Tokyo Apartment" 
-                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" value="iPhone 16 Pro" />
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Target item or event</label>
+            <input type="text" id="targetItemName" placeholder="e.g., iPhone 16 Pro, Bike, Home" 
+                   class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none" value="iPhone 16 Pro" />
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Total Cost (¥ JPY)</label>
-              <input type="number" id="targetItemCost" placeholder="180000" 
-                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" value="180000" />
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Cost (¥ JPY)</label>
+              <input type="number" id="targetItemCost" placeholder="180000" inputmode="numeric" pattern="[0-9]*"
+                     class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none" value="180000" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Purchase Category</label>
-              <select id="targetItemCategory" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                <option value="gadget">Tech & Gadgets (Phone/Laptop)</option>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Category</label>
+              <select id="targetItemCategory" class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); padding-right: 2.5rem;">
+                <option value="gadget">Tech & Gadgets</option>
                 <option value="vehicle">Vehicle (Bike/Car)</option>
-                <option value="event">Major Life Event (Marriage/Travel)</option>
-                <option value="property">Real Estate (Home/Condo)</option>
+                <option value="event">Life Event (Marriage/Travel)</option>
+                <option value="property">Real Estate (Home)</option>
               </select>
             </div>
           </div>
 
-          <button id="calculateAffordabilityBtn" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2">
+          <button id="calculateAffordabilityBtn" class="w-full py-3.5 sm:py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2 mt-2">
             <i data-lucide="calculator" class="w-4 h-4"></i>
-            <span>Analyze Affordability & Financing</span>
+            <span>Analyze Affordability</span>
           </button>
         </div>
 
         <!-- Result Box -->
-        <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl p-6 flex flex-col justify-between">
+        <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl p-5 sm:p-6 flex flex-col justify-between mt-2 lg:mt-0">
           <div id="affordabilityResult">
             <!-- Populated via JS -->
           </div>
@@ -188,74 +226,76 @@
     </section>
 
     <!-- Monthly Data Log & Sheet Sync Form -->
-    <section class="glass-card rounded-2xl p-6 sm:p-8 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
+    <section class="glass-card rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 sm:pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
         <div>
-          <h2 class="text-lg font-bold">Monthly Portfolio Log & Data Sheet</h2>
-          <p class="text-xs text-slate-500">Enter monthly updates here. Data is saved locally and can be exported directly to your CSV/Excel spreadsheet.</p>
+          <h2 class="text-base sm:text-lg font-bold">Monthly Portfolio Log</h2>
+          <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Enter monthly updates here. Exports cleanly to CSV.</p>
         </div>
-        <div class="flex items-center space-x-3">
-          <button id="exportCsvBtn" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition flex items-center space-x-1.5">
+        <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+          <button id="exportCsvBtn" class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 dark:active:bg-slate-700 text-xs font-semibold transition flex items-center justify-center space-x-1.5">
             <i data-lucide="download" class="w-4 h-4"></i>
-            <span>Export Updated CSV</span>
+            <span>Export CSV</span>
           </button>
-          <button id="toggleAddModal" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition flex items-center space-x-1.5">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>Add Monthly Entry</span>
-          </button>
+          <!-- Mobile Scroll hint -->
+          <div class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center space-x-1.5 lg:hidden">
+            <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+            <span>Scroll table to view all</span>
+          </div>
         </div>
       </div>
 
       <!-- Quick Add Form -->
-      <form id="newEntryForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 py-6">
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Date (YYYY-MM-DD)</label>
-          <input type="date" id="formDate" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+      <form id="newEntryForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 py-5 sm:py-6">
+        <div class="col-span-2 sm:col-span-1">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Date (YYYY-MM-DD)</label>
+          <input type="date" id="formDate" required class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Emergency Fund (¥)</label>
-          <input type="number" id="formEmergency" step="any" required placeholder="307002" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Emergency Fund (¥)</label>
+          <input type="number" id="formEmergency" inputmode="numeric" required placeholder="307002" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">NISA Balance (¥)</label>
-          <input type="number" id="formNisa" step="any" required placeholder="73355" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">NISA Balance (¥)</label>
+          <input type="number" id="formNisa" inputmode="numeric" required placeholder="73355" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">ESOP Balance (¥)</label>
-          <input type="number" id="formEsop" step="any" required placeholder="78214" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">ESOP Balance (¥)</label>
+          <input type="number" id="formEsop" inputmode="numeric" required placeholder="78214" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">DC Pension (¥)</label>
-          <input type="number" id="formDc" step="any" required placeholder="60730" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">DC Pension (¥)</label>
+          <input type="number" id="formDc" inputmode="numeric" required placeholder="60730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
         </div>
         <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Pending Loan (¥)</label>
-          <input type="number" id="formLiability" step="any" required placeholder="283730" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Pending Loan (¥)</label>
+          <input type="number" id="formLiability" inputmode="numeric" required placeholder="283730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
         </div>
-        <div class="col-span-2 sm:col-span-3 lg:col-span-6 flex justify-end">
-          <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition">
-            Save Record to Sheet
+        <div class="col-span-2 sm:col-span-3 lg:col-span-6 flex justify-end mt-2 lg:mt-0">
+          <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm sm:text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Save Record</span>
           </button>
         </div>
       </form>
 
-      <!-- History Table -->
-      <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-        <table class="w-full text-left text-xs border-collapse">
+      <!-- History Table (Responsive horizontally scrolling wrapper) -->
+      <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 pb-1">
+        <table class="w-full text-left text-xs border-collapse min-w-[800px]">
           <thead>
-            <tr class="bg-slate-100/70 dark:bg-slate-900/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
-              <th class="p-3">Date</th>
-              <th class="p-3">Emergency Fund</th>
-              <th class="p-3">NISA</th>
-              <th class="p-3">ESOP</th>
-              <th class="p-3">DC Pension</th>
-              <th class="p-3">Total Assets</th>
-              <th class="p-3">Pending Liability</th>
-              <th class="p-3">Net Wealth</th>
-              <th class="p-3 text-center">Action</th>
+            <tr class="bg-slate-100/70 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
+              <th class="p-3.5 whitespace-nowrap">Date</th>
+              <th class="p-3.5 whitespace-nowrap">Emergency</th>
+              <th class="p-3.5 whitespace-nowrap">NISA</th>
+              <th class="p-3.5 whitespace-nowrap">ESOP</th>
+              <th class="p-3.5 whitespace-nowrap">DC Pension</th>
+              <th class="p-3.5 whitespace-nowrap">Total Assets</th>
+              <th class="p-3.5 whitespace-nowrap">Liability</th>
+              <th class="p-3.5 whitespace-nowrap">Net Wealth</th>
+              <th class="p-3.5 text-center whitespace-nowrap">Action</th>
             </tr>
           </thead>
-          <tbody id="portfolioTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
+          <tbody id="portfolioTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
             <!-- Populated via JS -->
           </tbody>
         </table>
@@ -265,6 +305,14 @@
   </main>
 
   <script>
+    // Configuration & meta tag adjustment for better mobile display scaling
+    const setMobileViewportHeight = () => {
+        const doc = document.documentElement;
+        doc.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+    };
+    window.addEventListener('resize', setMobileViewportHeight);
+    setMobileViewportHeight();
+
     // --- Initial Seed Data from your Monthly Savings Sheets ---
     const initialPortfolioData = [
       { date: '2026-05-31', dc: 20190, esop: 10876.2, nisa: 21626, emergency: 154956, liability: 594082 },
@@ -281,6 +329,14 @@
     // Format Currency Helper (JPY)
     function formatJPY(val) {
       return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(val);
+    }
+    
+    // Abbreviated format for small screens (e.g. 300K instead of 300,000)
+    function formatJPYShort(val) {
+      if(window.innerWidth < 640 && Math.abs(val) >= 10000) {
+          return '¥' + (val / 1000).toFixed(0) + 'k';
+      }
+      return formatJPY(val);
     }
 
     let growthChartInstance = null;
@@ -304,19 +360,24 @@
       const prevMetrics = calculateMetrics(prev);
 
       // Update KPI Cards
-      document.getElementById('kpiNetWealth').textContent = formatJPY(latestMetrics.netWealth);
-      document.getElementById('kpiTotalAssets').textContent = formatJPY(latestMetrics.totalAssets);
-      document.getElementById('kpiPendingDebt').textContent = formatJPY(latest.liability);
-      document.getElementById('kpiEmergencyFund').textContent = formatJPY(latest.emergency);
+      document.getElementById('kpiNetWealth').textContent = formatJPYShort(latestMetrics.netWealth);
+      document.getElementById('kpiTotalAssets').textContent = formatJPYShort(latestMetrics.totalAssets);
+      document.getElementById('kpiPendingDebt').textContent = formatJPYShort(latest.liability);
+      
+      // Update both desktop and mobile Emergency cards
+      document.getElementById('kpiEmergencyFund').textContent = formatJPYShort(latest.emergency);
+      const mobElem = document.getElementById('kpiEmergencyFundMobile');
+      if(mobElem) mobElem.textContent = formatJPYShort(latest.emergency);
 
       const netWealthDiff = latestMetrics.netWealth - prevMetrics.netWealth;
       const growthEl = document.getElementById('kpiNetWealthGrowth');
+      
       if (netWealthDiff >= 0) {
-        growthEl.className = "mt-1 text-xs text-emerald-600 dark:text-emerald-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> +${formatJPY(netWealthDiff)} since last month`;
+        growthEl.className = "mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center";
+        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> +${formatJPYShort(netWealthDiff)} since last month`;
       } else {
-        growthEl.className = "mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3.5 h-3.5 mr-0.5"></i> ${formatJPY(netWealthDiff)} since last month`;
+        growthEl.className = "mt-1 text-[10px] sm:text-xs text-rose-600 dark:text-rose-400 flex items-center";
+        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> ${formatJPYShort(netWealthDiff)} since last month`;
       }
 
       // Render Table Rows
@@ -326,18 +387,18 @@
         const actualIdx = portfolio.length - 1 - revIdx;
         const m = calculateMetrics(row);
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition";
+        tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition cursor-default";
         tr.innerHTML = `
-          <td class="p-3 font-semibold">${row.date}</td>
-          <td class="p-3">${formatJPY(row.emergency)}</td>
-          <td class="p-3">${formatJPY(row.nisa)}</td>
-          <td class="p-3">${formatJPY(row.esop)}</td>
-          <td class="p-3">${formatJPY(row.dc)}</td>
-          <td class="p-3 font-medium text-blue-600 dark:text-blue-400">${formatJPY(m.totalAssets)}</td>
-          <td class="p-3 font-medium text-rose-500">${formatJPY(row.liability)}</td>
-          <td class="p-3 font-bold ${m.netWealth >= 0 ? 'text-emerald-600' : 'text-amber-500'}">${formatJPY(m.netWealth)}</td>
-          <td class="p-3 text-center">
-            <button onclick="deleteEntry(${actualIdx})" class="text-slate-400 hover:text-rose-500 transition">
+          <td class="p-3.5 font-semibold whitespace-nowrap">${row.date}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatJPY(row.emergency)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatJPY(row.nisa)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatJPY(row.esop)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatJPY(row.dc)}</td>
+          <td class="p-3.5 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">${formatJPY(m.totalAssets)}</td>
+          <td class="p-3.5 font-medium text-rose-500 whitespace-nowrap">${formatJPY(row.liability)}</td>
+          <td class="p-3.5 font-bold ${m.netWealth >= 0 ? 'text-emerald-600' : 'text-amber-500'} whitespace-nowrap">${formatJPY(m.netWealth)}</td>
+          <td class="p-3.5 text-center">
+            <button onclick="deleteEntry(${actualIdx})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition active:scale-95" aria-label="Delete Entry">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </td>
@@ -350,7 +411,8 @@
     }
 
     function renderCharts(latest) {
-      const dates = portfolio.map(e => e.date);
+      const isMobile = window.innerWidth < 768;
+      const dates = portfolio.map(e => isMobile ? e.date.substring(5) : e.date); // Show only MM-DD on mobile
       const netWealths = portfolio.map(e => calculateMetrics(e).netWealth);
       const totalAssets = portfolio.map(e => calculateMetrics(e).totalAssets);
       const liabilities = portfolio.map(e => e.liability);
@@ -358,6 +420,11 @@
       // 1. Growth Area Chart
       const ctxGrowth = document.getElementById('growthChart').getContext('2d');
       if (growthChartInstance) growthChartInstance.destroy();
+
+      // Chart.js default font sizes setup
+      Chart.defaults.font.size = isMobile ? 10 : 12;
+      Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+      Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b';
 
       growthChartInstance = new Chart(ctxGrowth, {
         type: 'line',
@@ -369,28 +436,31 @@
               data: netWealths,
               borderColor: '#10b981',
               backgroundColor: 'rgba(16, 185, 129, 0.12)',
-              borderWidth: 2.5,
+              borderWidth: isMobile ? 2 : 2.5,
               tension: 0.35,
               fill: true,
               pointBackgroundColor: '#10b981',
-              pointRadius: 4
+              pointRadius: isMobile ? 3 : 4,
+              pointHitRadius: 10
             },
             {
-              label: 'Total Assets',
+              label: 'Assets',
               data: totalAssets,
               borderColor: '#3b82f6',
-              borderDash: [5, 5],
-              borderWidth: 2,
+              borderDash: [4, 4],
+              borderWidth: isMobile ? 1.5 : 2,
               pointRadius: 0,
+              pointHitRadius: 10,
               tension: 0.35,
               fill: false
             },
             {
-              label: 'Pending Loan',
+              label: 'Loan',
               data: liabilities,
               borderColor: '#f43f5e',
-              borderWidth: 1.5,
+              borderWidth: isMobile ? 1.5 : 2,
               pointRadius: 0,
+              pointHitRadius: 10,
               tension: 0.35,
               fill: false
             }
@@ -399,20 +469,39 @@
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          interaction: {
+              mode: 'index',
+              intersect: false,
+          },
           plugins: {
-            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+            legend: { 
+                position: 'top', 
+                labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } 
+            },
             tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              titleFont: { size: 13 },
+              bodyFont: { size: 12 },
+              padding: 10,
+              cornerRadius: 8,
               callbacks: {
-                label: (ctx) => `${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}`
+                label: (ctx) => ` ${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}`
               }
             }
           },
           scales: {
             y: {
-              ticks: { callback: (v) => '¥' + (v / 1000).toLocaleString() + 'k' },
-              grid: { color: 'rgba(156, 163, 175, 0.1)' }
+              ticks: { 
+                  callback: (v) => (v / 1000).toLocaleString() + 'k',
+                  maxTicksLimit: isMobile ? 5 : 8
+              },
+              grid: { color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' },
+              border: { display: false }
             },
-            x: { grid: { display: false } }
+            x: { 
+                grid: { display: false },
+                ticks: { maxTicksLimit: isMobile ? 4 : 8 }
+            }
           }
         }
       });
@@ -422,7 +511,7 @@
       if (allocationChartInstance) allocationChartInstance.destroy();
 
       const allocData = [latest.emergency, latest.nisa, latest.esop, latest.dc];
-      const allocLabels = ['Cash Savings', 'NISA', 'ESOP', 'DC Pension'];
+      const allocLabels = ['Cash', 'NISA', 'ESOP', 'Pension'];
       const allocColors = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
 
       allocationChartInstance = new Chart(ctxAlloc, {
@@ -432,22 +521,27 @@
           datasets: [{
             data: allocData,
             backgroundColor: allocColors,
-            borderWidth: 0,
-            hoverOffset: 4
+            borderWidth: 2,
+            borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
+            hoverOffset: isMobile ? 2 : 4
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: { padding: 10 },
           plugins: {
             legend: { display: false },
             tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              padding: 10,
+              cornerRadius: 8,
               callbacks: {
-                label: (ctx) => `${ctx.label}: ${formatJPY(ctx.parsed)} (${((ctx.parsed / allocData.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`
+                label: (ctx) => ` ${ctx.label}: ${formatJPY(ctx.parsed)} (${((ctx.parsed / allocData.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`
               }
             }
           },
-          cutout: '72%'
+          cutout: isMobile ? '65%' : '72%'
         }
       });
 
@@ -455,10 +549,12 @@
       const totalAlloc = allocData.reduce((a, b) => a + b, 0);
       const legContainer = document.getElementById('allocationLegend');
       legContainer.innerHTML = allocLabels.map((lbl, idx) => `
-        <div class="flex items-center space-x-1.5">
-          <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${allocColors[idx]}"></span>
-          <span class="text-slate-500">${lbl}:</span>
-          <span class="font-semibold">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span>
+        <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg">
+          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span>
+          <div class="flex flex-col">
+              <span class="text-slate-500 font-medium">${lbl}</span>
+              <span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span>
+          </div>
         </div>
       `).join('');
     }
@@ -484,84 +580,75 @@
       let recommendations = [];
 
       switch (category) {
-        case 'gadget': // Phones, Laptops, Gadgets
-          // Rule: Never take consumer loans / high-interest debt for gadgets
+        case 'gadget': 
           if (cost <= usableLiquidCash) {
             canAfford = true;
             cashToPay = cost;
-            loanAmount = 0;
-            verdictTitle = "Fully Affordable (100% Cash)";
+            verdictTitle = "Affordable (100% Cash)";
             verdictColor = "text-emerald-600 dark:text-emerald-400";
-            rationale = `You can buy <strong>${name}</strong> outright in cash without breaching your minimum emergency threshold of ${formatJPY(baselineEmergencyBuffer)}.`;
-            recommendations.push("Pay 100% in cash. Never use high-interest consumer credit or loan installments for tech gadgets.");
-            recommendations.push(`Remaining cash reserve after purchase: <strong>${formatJPY(currentCash - cost)}</strong>.`);
+            rationale = `You can buy <strong>${name}</strong> outright without breaching your ${formatJPY(baselineEmergencyBuffer)} emergency buffer.`;
+            recommendations.push("Pay 100% in cash. Avoid consumer EMI for tech gadgets.");
+            recommendations.push(`Post-purchase cash reserve: <strong>${formatJPY(currentCash - cost)}</strong>.`);
           } else {
             canAfford = false;
-            cashToPay = 0;
-            loanAmount = 0;
             const shortfall = cost - usableLiquidCash;
-            const monthsToSave = Math.ceil(shortfall / 40000); // assuming ¥40k/mo savings capacity
+            const monthsToSave = Math.ceil(shortfall / 40000); 
             verdictTitle = "Not Recommended Right Now";
             verdictColor = "text-rose-600 dark:text-rose-400";
-            rationale = `Buying ${name} in cash right now would deplete your safety buffer below safe levels.`;
-            recommendations.push("<strong>Do NOT take an EMI or personal loan</strong> for consumer electronics (interest rates erode net wealth).");
-            recommendations.push(`<strong>Adjustment Plan:</strong> Save approximately ¥40,000 for <strong>${monthsToSave} more month(s)</strong> to purchase it comfortably without touching emergency reserves.`);
+            rationale = `Buying ${name} in cash right now would dip into your essential emergency buffer.`;
+            recommendations.push("<strong>Avoid EMI loans</strong> for consumer electronics.");
+            recommendations.push(`Save approx ¥40,000/mo for <strong>${monthsToSave} more month(s)</strong> first.`);
           }
           break;
 
-        case 'vehicle': // Bike or Car
-          // Rule: 30-50% down payment minimum, remaining on low-rate vehicle loan if EMI < 15% net salary
+        case 'vehicle': 
           const vehicleDownPayment = Math.min(cost * 0.4, usableLiquidCash);
           const vehicleLoan = cost - vehicleDownPayment;
-          const estimatedBikeEmi = vehicleLoan > 0 ? (vehicleLoan * 1.04) / 24 : 0; // 24 mo at ~4%
+          const estimatedBikeEmi = vehicleLoan > 0 ? (vehicleLoan * 1.04) / 24 : 0; 
 
           if (usableLiquidCash >= cost * 0.3 && estimatedBikeEmi <= (monthlyNetSalary * 0.15)) {
             canAfford = true;
             cashToPay = Math.round(vehicleDownPayment);
             loanAmount = Math.round(vehicleLoan);
-            verdictTitle = "Affordable with Prudent Split";
+            verdictTitle = "Affordable with Auto Loan";
             verdictColor = "text-emerald-600 dark:text-emerald-400";
-            rationale = `You can purchase <strong>${name}</strong> using a hybrid down payment + low-rate vehicle loan.`;
-            recommendations.push(`Down Payment (Cash): <strong>${formatJPY(cashToPay)}</strong> (keeps your emergency cushion safe).`);
-            recommendations.push(`Vehicle Loan: <strong>${formatJPY(loanAmount)}</strong> across 24 months (Est. EMI: ~${formatJPY(estimatedBikeEmi)}/mo, well under 15% of your ¥270k net income).`);
+            rationale = `You can finance <strong>${name}</strong> safely with a hybrid approach.`;
+            recommendations.push(`Down Payment: <strong>${formatJPY(cashToPay)}</strong>.`);
+            recommendations.push(`Auto Loan: <strong>${formatJPY(loanAmount)}</strong> (Est EMI: ~${formatJPY(estimatedBikeEmi)}/mo).`);
           } else {
             canAfford = false;
-            verdictTitle = "Wait & Strengthen Liquidity";
+            verdictTitle = "Wait & Save Larger Down Payment";
             verdictColor = "text-amber-500";
             const downShortfall = (cost * 0.4) - usableLiquidCash;
-            rationale = `Your liquid cash is currently below the recommended 40% down payment buffer (${formatJPY(cost * 0.4)}).`;
-            recommendations.push(`Save an additional <strong>${formatJPY(Math.max(0, downShortfall))}</strong> in liquid cash before proceeding.`);
-            recommendations.push("Avoid zero-down loans, which come with steep dealer interest rates.");
+            rationale = `Your liquid cash is below the recommended 40% down payment buffer for vehicles.`;
+            recommendations.push(`Save an additional <strong>${formatJPY(Math.max(0, downShortfall))}</strong> in cash before proceeding.`);
           }
           break;
 
-        case 'event': // Marriage, Major Travel
-          // Rule: Never fund life celebrations on personal loans (interest 10-15% is toxic)
+        case 'event': 
           if (usableLiquidCash >= cost) {
             canAfford = true;
             cashToPay = cost;
-            loanAmount = 0;
             verdictTitle = "Affordable in Cash";
             verdictColor = "text-emerald-600";
-            rationale = `Your liquid savings can fully cover <strong>${name}</strong> without borrowing.`;
-            recommendations.push("Pay 100% from savings. Avoid personal loans for weddings or events at all costs.");
+            rationale = `Your savings fully cover <strong>${name}</strong> without borrowing.`;
+            recommendations.push("Pay 100% from savings. Never take personal loans for weddings/travel.");
           } else {
             canAfford = false;
             const weddingShortfall = cost - usableLiquidCash;
             const monthsNeeded = Math.ceil(weddingShortfall / 60000);
-            verdictTitle = "Requires Target Planning";
+            verdictTitle = "Requires Target Savings Plan";
             verdictColor = "text-rose-500";
-            rationale = `Personal loans for lifestyle events like ${name} carry 10%–14% interest and risk reversing your net wealth gains.`;
+            rationale = `Personal loans for lifestyle events carry toxic 10-15% interest rates.`;
             recommendations.push(`<strong>Cash Shortfall:</strong> ${formatJPY(weddingShortfall)}.`);
-            recommendations.push(`<strong>Adjustment Strategy:</strong> Temporarily pause extra NISA/ESOP allocations and reallocate ¥60,000/mo into emergency/liquid cash for <strong>${monthsNeeded} months</strong>.`);
+            recommendations.push(`Reallocate ¥60,000/mo into cash for <strong>${monthsNeeded} months</strong>.`);
           }
           break;
 
-        case 'property': // Real Estate / Home
-          // Rule: 10-20% down payment + closing costs; Mortgage with EMI <= 25% of net salary
+        case 'property': 
           const reqDown = cost * 0.15;
           const mortAmount = cost * 0.85;
-          const estMortgageEmi = (mortAmount * 0.012) / 12 + (mortAmount / 360); // approx Japan 1.2% 30yr
+          const estMortgageEmi = (mortAmount * 0.012) / 12 + (mortAmount / 360); 
 
           if (usableLiquidCash >= reqDown && estMortgageEmi <= (monthlyNetSalary * 0.30)) {
             canAfford = true;
@@ -569,17 +656,17 @@
             loanAmount = Math.round(mortAmount);
             verdictTitle = "Feasible Home Purchase";
             verdictColor = "text-emerald-600";
-            rationale = `Meets the 15% down payment test and estimated mortgage is within safe debt-to-income limits.`;
+            rationale = `Meets the 15% down payment test and mortgage is within safe limits.`;
             recommendations.push(`Cash Down Payment: <strong>${formatJPY(cashToPay)}</strong>.`);
-            recommendations.push(`Housing Mortgage: <strong>${formatJPY(loanAmount)}</strong> (Est. Monthly payment: ~${formatJPY(estMortgageEmi)}/mo).`);
+            recommendations.push(`Mortgage: <strong>${formatJPY(loanAmount)}</strong> (Est ~${formatJPY(estMortgageEmi)}/mo).`);
           } else {
             canAfford = false;
-            verdictTitle = "Long-Term Goal (Accumulate Seed Down Payment)";
+            verdictTitle = "Keep Accumulating Seed Down Payment";
             verdictColor = "text-amber-500";
             const downShortfall = reqDown - usableLiquidCash;
-            rationale = `Buying property requires at least 15% down payment + reserves (${formatJPY(reqDown)}).`;
-            recommendations.push(`<strong>Down Payment Shortfall:</strong> ${formatJPY(Math.max(0, downShortfall))}.`);
-            recommendations.push(`Continue compounding NISA & ESOP assets to reach the required lump sum.`);
+            rationale = `Property requires at least 15% down payment (${formatJPY(reqDown)}).`;
+            recommendations.push(`<strong>Shortfall:</strong> ${formatJPY(Math.max(0, downShortfall))}.`);
+            recommendations.push(`Continue compounding NISA & ESOP to reach the lump sum.`);
           }
           break;
       }
@@ -588,34 +675,34 @@
       const resContainer = document.getElementById('affordabilityResult');
       resContainer.innerHTML = `
         <div class="space-y-4">
-          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700/50 gap-2">
             <div>
-              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Analysis Verdict</span>
-              <h3 class="text-lg font-bold ${verdictColor}">${verdictTitle}</h3>
+              <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Analysis Verdict</span>
+              <h3 class="text-base sm:text-lg font-bold ${verdictColor} mt-0.5">${verdictTitle}</h3>
             </div>
-            <div class="text-right">
-              <span class="text-xs text-slate-400">Total Outlay</span>
-              <div class="text-base font-bold">${formatJPY(cost)}</div>
+            <div class="sm:text-right">
+              <span class="text-[10px] sm:text-xs text-slate-400">Total Outlay</span>
+              <div class="text-sm sm:text-base font-bold">${formatJPY(cost)}</div>
             </div>
           </div>
 
-          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${rationale}</p>
+          <p class="text-[13px] sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${rationale}</p>
 
           <div class="grid grid-cols-2 gap-3 py-2">
-            <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <span class="text-[11px] text-slate-400 block">Recommended Cash</span>
-              <span class="text-sm font-bold text-slate-800 dark:text-slate-100">${formatJPY(cashToPay)}</span>
+            <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <span class="text-[10px] sm:text-[11px] font-semibold text-slate-400 block uppercase tracking-wide">Rec. Cash</span>
+              <span class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mt-1 block">${formatJPY(cashToPay)}</span>
             </div>
-            <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-              <span class="text-[11px] text-slate-400 block">Recommended Loan</span>
-              <span class="text-sm font-bold ${loanAmount > 0 ? 'text-amber-600' : 'text-slate-400'}">${formatJPY(loanAmount)}</span>
+            <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+              <span class="text-[10px] sm:text-[11px] font-semibold text-slate-400 block uppercase tracking-wide">Rec. Loan</span>
+              <span class="text-base sm:text-lg font-bold ${loanAmount > 0 ? 'text-amber-600' : 'text-slate-400'} mt-1 block">${formatJPY(loanAmount)}</span>
             </div>
           </div>
 
-          <div>
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 block">Advisor Recommendations & Rebalancing:</span>
-            <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-300">
-              ${recommendations.map(r => `<li class="flex items-start"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500 mr-1.5 mt-0.5 flex-shrink-0"></i><span>${r}</span></li>`).join('')}
+          <div class="bg-slate-100/50 dark:bg-slate-800/50 p-3 sm:p-4 rounded-xl mt-2">
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2 block flex items-center"><i data-lucide="info" class="w-3.5 h-3.5 mr-1.5 text-blue-500"></i> Advisor Notes:</span>
+            <ul class="text-[11px] sm:text-xs space-y-2 text-slate-600 dark:text-slate-300">
+              ${recommendations.map(r => `<li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 mr-2 flex-shrink-0 mt-0.5"></i><span class="leading-relaxed">${r}</span></li>`).join('')}
             </ul>
           </div>
         </div>
@@ -626,26 +713,44 @@
     // Form submission handler
     document.getElementById('newEntryForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const newEntry = {
-        date: document.getElementById('formDate').value,
-        emergency: parseFloat(document.getElementById('formEmergency').value) || 0,
-        nisa: parseFloat(document.getElementById('formNisa').value) || 0,
-        esop: parseFloat(document.getElementById('formEsop').value) || 0,
-        dc: parseFloat(document.getElementById('formDc').value) || 0,
-        liability: parseFloat(document.getElementById('formLiability').value) || 0
-      };
+      
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Saving...</span>';
+      lucide.createIcons();
+      
+      setTimeout(() => {
+          const newEntry = {
+            date: document.getElementById('formDate').value,
+            emergency: parseFloat(document.getElementById('formEmergency').value) || 0,
+            nisa: parseFloat(document.getElementById('formNisa').value) || 0,
+            esop: parseFloat(document.getElementById('formEsop').value) || 0,
+            dc: parseFloat(document.getElementById('formDc').value) || 0,
+            liability: parseFloat(document.getElementById('formLiability').value) || 0
+          };
 
-      // Check if entry for date already exists, update or add
-      const existingIdx = portfolio.findIndex(item => item.date === newEntry.date);
-      if (existingIdx >= 0) {
-        portfolio[existingIdx] = newEntry;
-      } else {
-        portfolio.push(newEntry);
-      }
+          const existingIdx = portfolio.findIndex(item => item.date === newEntry.date);
+          if (existingIdx >= 0) {
+            portfolio[existingIdx] = newEntry;
+          } else {
+            portfolio.push(newEntry);
+          }
 
-      renderDashboard();
-      evaluateAffordability();
-      alert(`Portfolio record for ${newEntry.date} saved successfully!`);
+          renderDashboard();
+          evaluateAffordability();
+          
+          // Provide visual feedback instead of an annoying alert on mobile
+          submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
+          submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Saved Successfully!</span>';
+          lucide.createIcons();
+          
+          setTimeout(() => {
+              submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm sm:text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition flex items-center justify-center space-x-1.5";
+              submitBtn.innerHTML = originalText;
+              lucide.createIcons();
+          }, 2000);
+          
+      }, 400); // slight simulated delay for tactile UX
     });
 
     // Delete Entry Helper
@@ -668,27 +773,62 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `Monthly_Savings_Updated_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `WealthFlow_Export_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     });
 
-    // Dark Mode Toggle
+    // Dark Mode Initialization & Toggle
+    const initializeTheme = () => {
+        // Check local storage or system preference
+        const savedTheme = localStorage.getItem('wealthflow_theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcon();
+    };
+
+    const updateThemeIcon = () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+        // Redraw charts to update text/grid colors for new theme
+        if (portfolio.length > 0) renderCharts(portfolio[portfolio.length - 1]);
+        lucide.createIcons();
+    };
+
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
       const isDark = document.documentElement.classList.contains('dark');
-      document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-      lucide.createIcons();
+      localStorage.setItem('wealthflow_theme', isDark ? 'dark' : 'light');
+      updateThemeIcon();
     });
 
     // Affordability Button Event
-    document.getElementById('calculateAffordabilityBtn').addEventListener('click', evaluateAffordability);
+    document.getElementById('calculateAffordabilityBtn').addEventListener('click', () => {
+        evaluateAffordability();
+        // Scroll slightly down to ensure result is visible on mobile
+        if(window.innerWidth < 1024) {
+            document.getElementById('affordabilityResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    });
 
-    // Initial Set
+    // Initialize UI
+    initializeTheme();
     document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
     renderDashboard();
     evaluateAffordability();
+    
+    // Handle window resize to re-render charts nicely
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            renderCharts(portfolio[portfolio.length - 1]);
+        }, 250);
+    });
   </script>
 </body>
 </html>
