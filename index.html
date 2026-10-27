@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>WealthFlow | Personal Investment & Affordability Suite</title>
   
-  <!-- Add Web App Manifest and Apple Touch Icon support for better mobile "Add to Home Screen" experience -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href='data:application/manifest+json,{"name":"WealthFlow","short_name":"WealthFlow","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2953/2953363.png","sizes":"512x512","type":"image/png"}]}'>
   
-  <!-- Tailwind CSS & Lucide Icons & Chart.js -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -31,49 +29,16 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
     body { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-    }
-    .dark .glass-card {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    
-    /* Custom Scrollbar for mobile tables */
-    .table-scroll::-webkit-scrollbar {
-        height: 6px;
-    }
-    .table-scroll::-webkit-scrollbar-track {
-        background: rgba(0,0,0,0.05);
-        border-radius: 4px;
-    }
-    .dark .table-scroll::-webkit-scrollbar-track {
-        background: rgba(255,255,255,0.05);
-    }
-    .table-scroll::-webkit-scrollbar-thumb {
-        background: rgba(0,0,0,0.2);
-        border-radius: 4px;
-    }
-    .dark .table-scroll::-webkit-scrollbar-thumb {
-        background: rgba(255,255,255,0.2);
-    }
-    
-    /* Ensure inputs don't zoom in on iOS Safari */
-    input[type="text"], input[type="number"], input[type="date"], select {
-        font-size: 16px !important;
-    }
-    
-    /* Tab active state */
-    .tab-active {
-        border-bottom: 2px solid #10b981;
-        color: #10b981;
-    }
-    .dark .tab-active {
-        color: #34d399;
-    }
+    .glass-card { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
+    .dark .glass-card { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .table-scroll::-webkit-scrollbar { height: 6px; }
+    .table-scroll::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 4px; }
+    .dark .table-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+    .table-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.2); border-radius: 4px; }
+    .dark .table-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+    input[type="text"], input[type="number"], input[type="date"], select { font-size: 16px !important; }
+    .tab-active { border-bottom: 2px solid #10b981; color: #10b981; }
+    .dark .tab-active { color: #34d399; }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 pb-16 sm:pb-8">
@@ -92,9 +57,10 @@
       </div>
 
       <div class="flex items-center space-x-2 sm:space-x-3">
-        <div class="hidden md:flex items-center text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-          <i data-lucide="bell-ring" class="w-3.5 h-3.5 mr-1.5 animate-pulse"></i> Next Update: 30th
-        </div>
+        <!-- Settings/Wipe Data Button -->
+        <button id="wipeDataBtn" class="p-2 sm:p-2.5 rounded-lg bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900 transition flex items-center" aria-label="Wipe Data">
+          <i data-lucide="power" class="w-4 h-4"></i>
+        </button>
         <button id="themeToggle" class="p-2 sm:p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" aria-label="Toggle Dark Mode">
           <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
         </button>
@@ -114,7 +80,7 @@
 
     <!-- ==================== TAB 1: PORTFOLIO & AFFORDABILITY ==================== -->
     <div id="view-portfolio">
-        <!-- KPI Summary Row - Optimized for Mobile Grid -->
+        <!-- KPI Summary Row -->
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
           <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
             <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
@@ -123,7 +89,7 @@
             </div>
             <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiNetWealth">¥0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center" id="kpiNetWealthGrowth">
-              <i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> Positive Trajectory
+              <i data-lucide="minus" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> No Data
             </div>
           </div>
 
@@ -173,7 +139,7 @@
               </div>
               <span class="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Monthly</span>
             </div>
-            <div class="h-60 sm:h-72 w-full">
+            <div class="h-60 sm:h-72 w-full flex items-center justify-center" id="growthChartContainer">
               <canvas id="growthChart"></canvas>
             </div>
           </div>
@@ -184,7 +150,7 @@
                 <h2 class="text-sm sm:text-base font-bold">Asset Allocation</h2>
               </div>
             </div>
-            <div class="h-48 sm:h-64 flex items-center justify-center">
+            <div class="h-48 sm:h-64 flex items-center justify-center" id="allocationChartContainer">
               <canvas id="allocationChart"></canvas>
             </div>
             <div id="allocationLegend" class="grid grid-cols-2 gap-2 mt-4 text-[10px] sm:text-xs"></div>
@@ -235,7 +201,9 @@
             </div>
 
             <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl p-5 sm:p-6 flex flex-col justify-between mt-2 lg:mt-0">
-              <div id="affordabilityResult"></div>
+              <div id="affordabilityResult">
+                  <div class="text-slate-500 text-sm text-center py-10">Add portfolio data first to use the calculator.</div>
+              </div>
             </div>
           </div>
         </section>
@@ -266,23 +234,23 @@
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Emergency Fund (¥)</label>
-              <input type="number" id="formEmergency" inputmode="numeric" required placeholder="307002" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formEmergency" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">NISA Balance (¥)</label>
-              <input type="number" id="formNisa" inputmode="numeric" required placeholder="73355" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formNisa" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">ESOP Balance (¥)</label>
-              <input type="number" id="formEsop" inputmode="numeric" required placeholder="78214" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formEsop" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">DC Pension (¥)</label>
-              <input type="number" id="formDc" inputmode="numeric" required placeholder="60730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formDc" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Pending Loan (¥)</label>
-              <input type="number" id="formLiability" inputmode="numeric" required placeholder="283730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formLiability" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             <div class="col-span-2 sm:col-span-3 lg:col-span-6 flex justify-end mt-2 lg:mt-0">
               <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm sm:text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
@@ -322,12 +290,12 @@
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
             <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-              <span>Avg Monthly Net Income</span>
+              <span>Avg Monthly Net</span>
               <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600"><i data-lucide="banknote" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
             <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400" id="kpiAvgNet">¥0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500 flex items-center">
-              Based on rolling 12 months
+              Rolling 12 months
             </div>
           </div>
           
@@ -336,7 +304,7 @@
               <span>Latest Net Pay</span>
             </div>
             <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiLatestNet">¥0</div>
-            <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiLatestMonth">Month</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiLatestMonth">No Data</div>
           </div>
           
           <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
@@ -345,19 +313,51 @@
               <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="gift" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
             <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-500" id="kpiLatestBonus">¥0</div>
-            <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiBonusMonth">Month</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiBonusMonth">No Data</div>
           </div>
+          
+          <!-- NEW: YOY KPI -->
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1 hidden lg:block">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span>Total YTD Income</span>
+              <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
+            </div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiYtdTotal">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiYtdYear">Current Year</div>
+          </div>
+        </section>
+        
+        <!-- Mobile YTD -->
+        <section class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm lg:hidden">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+            <span>Total YTD Income</span>
+            <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i></span>
+          </div>
+          <div class="mt-2 text-xl font-bold" id="kpiYtdTotalMobile">¥0</div>
         </section>
 
         <!-- Income Charts -->
-        <section class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-              <div>
-                <h2 class="text-sm sm:text-base font-bold">Salary & Bonus Trend (Net JPY)</h2>
-              </div>
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 class="text-sm sm:text-base font-bold">Monthly Trend (Net JPY)</h2>
+                  </div>
+                </div>
+                <div class="h-60 sm:h-72 w-full flex items-center justify-center" id="incomeChartContainer">
+                  <canvas id="incomeChart"></canvas>
+                </div>
             </div>
-            <div class="h-60 sm:h-80 w-full">
-              <canvas id="incomeChart"></canvas>
+            
+            <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 class="text-sm sm:text-base font-bold">Year-over-Year Total (Net JPY)</h2>
+                  </div>
+                </div>
+                <div class="h-60 sm:h-72 w-full flex items-center justify-center" id="yoyChartContainer">
+                  <canvas id="yoyChart"></canvas>
+                </div>
             </div>
         </section>
 
@@ -384,7 +384,7 @@
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Net Income (¥)</label>
-                  <input type="number" id="formIncNet" inputmode="numeric" required placeholder="270000" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
+                  <input type="number" id="formIncNet" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
                 </div>
                 <div class="col-span-2 sm:col-span-1 lg:col-span-2 flex justify-end mt-2 sm:mt-0 items-end">
                   <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-xs font-semibold active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
@@ -414,6 +414,23 @@
 
   </main>
 
+  <!-- Wipe Data Modal -->
+  <div id="wipeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
+          <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 mb-4 mx-auto">
+              <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-xl font-bold text-center mb-2">Reset App Data</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">
+              This will completely wipe the pre-loaded starter data and any entries you have saved. It will reset the app to a blank state. Are you sure?
+          </p>
+          <div class="space-y-3">
+              <button id="confirmWipeBtn" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md transition active:scale-95">Yes, Start Fresh</button>
+              <button id="cancelWipeBtn" class="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm transition active:scale-95">Cancel</button>
+          </div>
+      </div>
+  </div>
+
   <script>
     const setMobileViewportHeight = () => {
         const doc = document.documentElement;
@@ -434,7 +451,7 @@
         if(tabName === 'portfolio') renderDashboard();
     }
 
-    // --- Data Store ---
+    // --- Data Store & Wipe Logic ---
     const initialPortfolioData = [
       { date: '2026-05-31', dc: 20190, esop: 10876.2, nisa: 21626, emergency: 154956, liability: 594082 },
       { date: '2026-06-30', dc: 23601, esop: 22004.8, nisa: 31834, emergency: 254956, liability: 594082 },
@@ -445,7 +462,6 @@
       { date: '2026-10-30', dc: 60730, esop: 78214.3, nisa: 73355, emergency: 307002, liability: 283730 }
     ];
     
-    // Seeded from your provided Sheet1 rows 21-32
     const initialIncomeData = [
       { month: '2025-12', type: 'salary', net: 227176 },
       { month: '2026-01', type: 'salary', net: 282231 },
@@ -461,8 +477,26 @@
       { month: '2026-10', type: 'salary', net: 270899 }
     ];
 
-    let portfolio = JSON.parse(localStorage.getItem('wealthflow_portfolio')) || initialPortfolioData;
-    let incomeLog = JSON.parse(localStorage.getItem('wealthflow_income')) || initialIncomeData;
+    let portfolio = localStorage.getItem('wealthflow_portfolio_v2') ? JSON.parse(localStorage.getItem('wealthflow_portfolio_v2')) : initialPortfolioData;
+    let incomeLog = localStorage.getItem('wealthflow_income_v2') ? JSON.parse(localStorage.getItem('wealthflow_income_v2')) : initialIncomeData;
+
+    // Wipe Modal Handlers
+    document.getElementById('wipeDataBtn').addEventListener('click', () => { document.getElementById('wipeModal').classList.remove('hidden'); });
+    document.getElementById('cancelWipeBtn').addEventListener('click', () => { document.getElementById('wipeModal').classList.add('hidden'); });
+    document.getElementById('confirmWipeBtn').addEventListener('click', () => {
+        portfolio = [];
+        incomeLog = [];
+        localStorage.setItem('wealthflow_portfolio_v2', JSON.stringify(portfolio));
+        localStorage.setItem('wealthflow_income_v2', JSON.stringify(incomeLog));
+        // Clear old pre-v2 keys if they exist
+        localStorage.removeItem('wealthflow_portfolio');
+        localStorage.removeItem('wealthflow_income');
+        
+        document.getElementById('wipeModal').classList.add('hidden');
+        renderDashboard();
+        renderIncomeDashboard();
+        evaluateAffordability();
+    });
 
     function formatJPY(val) { return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(val); }
     function formatJPYShort(val) { return (window.innerWidth < 640 && Math.abs(val) >= 10000) ? '¥' + (val / 1000).toFixed(0) + 'k' : formatJPY(val); }
@@ -470,6 +504,7 @@
     let growthChartInstance = null;
     let allocationChartInstance = null;
     let incomeChartInstance = null;
+    let yoyChartInstance = null;
 
     // ================== PORTFOLIO LOGIC ==================
     function calculateMetrics(entry) {
@@ -479,10 +514,28 @@
     }
 
     function renderDashboard() {
-      portfolio.sort((a, b) => new Date(a.date) - new Date(b.date));
-      localStorage.setItem('wealthflow_portfolio', JSON.stringify(portfolio));
+      const tbody = document.getElementById('portfolioTableBody');
+      tbody.innerHTML = '';
+      
+      if (portfolio.length === 0) {
+          document.getElementById('kpiNetWealth').textContent = '¥0';
+          document.getElementById('kpiTotalAssets').textContent = '¥0';
+          document.getElementById('kpiPendingDebt').textContent = '¥0';
+          document.getElementById('kpiEmergencyFund').textContent = '¥0';
+          if(document.getElementById('kpiEmergencyFundMobile')) document.getElementById('kpiEmergencyFundMobile').textContent = '¥0';
+          document.getElementById('kpiNetWealthGrowth').innerHTML = `<i data-lucide="minus" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> No Data`;
+          
+          if(growthChartInstance) growthChartInstance.destroy();
+          if(allocationChartInstance) allocationChartInstance.destroy();
+          document.getElementById('growthChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
+          document.getElementById('allocationChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
+          document.getElementById('allocationLegend').innerHTML = '';
+          tbody.innerHTML = `<tr><td colspan="9" class="p-4 text-center text-slate-500">No portfolio data found. Add your first entry below.</td></tr>`;
+          return;
+      }
 
-      if (portfolio.length === 0) return;
+      portfolio.sort((a, b) => new Date(a.date) - new Date(b.date));
+      localStorage.setItem('wealthflow_portfolio_v2', JSON.stringify(portfolio));
 
       const latest = portfolio[portfolio.length - 1];
       const prev = portfolio.length > 1 ? portfolio[portfolio.length - 2] : latest;
@@ -500,14 +553,12 @@
       const growthEl = document.getElementById('kpiNetWealthGrowth');
       if (netWealthDiff >= 0) {
         growthEl.className = "mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> +${formatJPYShort(netWealthDiff)} since last month`;
+        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> +${formatJPYShort(netWealthDiff)} since last record`;
       } else {
         growthEl.className = "mt-1 text-[10px] sm:text-xs text-rose-600 dark:text-rose-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> ${formatJPYShort(netWealthDiff)} since last month`;
+        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> ${formatJPYShort(netWealthDiff)} since last record`;
       }
 
-      const tbody = document.getElementById('portfolioTableBody');
-      tbody.innerHTML = '';
       portfolio.slice().reverse().forEach((row, revIdx) => {
         const actualIdx = portfolio.length - 1 - revIdx;
         const m = calculateMetrics(row);
@@ -534,6 +585,10 @@
     }
 
     function renderCharts(latest) {
+      if(portfolio.length === 0) return;
+      document.getElementById('growthChartContainer').innerHTML = '<canvas id="growthChart"></canvas>';
+      document.getElementById('allocationChartContainer').innerHTML = '<canvas id="allocationChart"></canvas>';
+
       const isMobile = window.innerWidth < 768;
       const dates = portfolio.map(e => isMobile ? e.date.substring(5) : e.date);
       const netWealths = portfolio.map(e => calculateMetrics(e).netWealth);
@@ -574,42 +629,78 @@
       const allocData = [latest.emergency, latest.nisa, latest.esop, latest.dc];
       const allocLabels = ['Cash', 'NISA', 'ESOP', 'Pension'];
       const allocColors = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
-      allocationChartInstance = new Chart(ctxAlloc, {
-        type: 'doughnut',
-        data: { labels: allocLabels, datasets: [{ data: allocData, backgroundColor: allocColors, borderWidth: 2, borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff', hoverOffset: isMobile ? 2 : 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, layout: { padding: 10 }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.label}: ${formatJPY(ctx.parsed)} (${((ctx.parsed / allocData.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)` } } }, cutout: isMobile ? '65%' : '72%' }
-      });
-      document.getElementById('allocationLegend').innerHTML = allocLabels.map((lbl, idx) => `<div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span><div class="flex flex-col"><span class="text-slate-500 font-medium">${lbl}</span><span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / allocData.reduce((a,b)=>a+b,0)) * 100).toFixed(1)}%</span></div></div>`).join('');
+      
+      const totalAlloc = allocData.reduce((a, b) => a + b, 0);
+      if(totalAlloc > 0) {
+          allocationChartInstance = new Chart(ctxAlloc, {
+            type: 'doughnut',
+            data: { labels: allocLabels, datasets: [{ data: allocData, backgroundColor: allocColors, borderWidth: 2, borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff', hoverOffset: isMobile ? 2 : 4 }] },
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: 10 }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.label}: ${formatJPY(ctx.parsed)} (${((ctx.parsed / totalAlloc) * 100).toFixed(1)}%)` } } }, cutout: isMobile ? '65%' : '72%' }
+          });
+          document.getElementById('allocationLegend').innerHTML = allocLabels.map((lbl, idx) => `<div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span><div class="flex flex-col"><span class="text-slate-500 font-medium">${lbl}</span><span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span></div></div>`).join('');
+      } else {
+          document.getElementById('allocationChartContainer').innerHTML = '<div class="text-slate-400 text-sm">Assets are ¥0</div>';
+      }
     }
 
     // ================== INCOME LOGIC ==================
     function renderIncomeDashboard() {
+      const tbody = document.getElementById('incomeTableBody');
+      tbody.innerHTML = '';
+      
+      if (incomeLog.length === 0) {
+          document.getElementById('kpiAvgNet').textContent = '¥0';
+          document.getElementById('kpiLatestNet').textContent = '¥0';
+          document.getElementById('kpiLatestMonth').textContent = 'No Data';
+          document.getElementById('kpiLatestBonus').textContent = '¥0';
+          document.getElementById('kpiBonusMonth').textContent = 'No Data';
+          document.getElementById('kpiYtdTotal').textContent = '¥0';
+          if(document.getElementById('kpiYtdTotalMobile')) document.getElementById('kpiYtdTotalMobile').textContent = '¥0';
+          
+          if(incomeChartInstance) incomeChartInstance.destroy();
+          if(yoyChartInstance) yoyChartInstance.destroy();
+          document.getElementById('incomeChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
+          document.getElementById('yoyChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
+          
+          tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No income data found. Log your first salary below.</td></tr>`;
+          return;
+      }
+
       incomeLog.sort((a, b) => new Date(a.month) - new Date(b.month));
-      localStorage.setItem('wealthflow_income', JSON.stringify(incomeLog));
+      localStorage.setItem('wealthflow_income_v2', JSON.stringify(incomeLog));
 
-      if (incomeLog.length === 0) return;
-
-      // Extract Salaries vs Bonuses
       const salaries = incomeLog.filter(i => i.type === 'salary');
       const bonuses = incomeLog.filter(i => i.type === 'bonus');
 
-      // KPIs
-      let avgNet = 0;
+      // Avg & Latest KPIs
       if (salaries.length > 0) {
         const last12 = salaries.slice(-12);
-        avgNet = last12.reduce((acc, curr) => acc + curr.net, 0) / last12.length;
+        const avgNet = last12.reduce((acc, curr) => acc + curr.net, 0) / last12.length;
         document.getElementById('kpiAvgNet').textContent = formatJPYShort(avgNet);
         document.getElementById('kpiLatestNet').textContent = formatJPYShort(salaries[salaries.length - 1].net);
         document.getElementById('kpiLatestMonth').textContent = salaries[salaries.length - 1].month;
+      } else {
+        document.getElementById('kpiAvgNet').textContent = '¥0';
+        document.getElementById('kpiLatestNet').textContent = '¥0';
+        document.getElementById('kpiLatestMonth').textContent = 'No Data';
       }
+      
       if (bonuses.length > 0) {
         document.getElementById('kpiLatestBonus').textContent = formatJPYShort(bonuses[bonuses.length - 1].net);
         document.getElementById('kpiBonusMonth').textContent = bonuses[bonuses.length - 1].month;
+      } else {
+        document.getElementById('kpiLatestBonus').textContent = '¥0';
+        document.getElementById('kpiBonusMonth').textContent = 'No Data';
       }
+      
+      // YTD Calculation (Current Year)
+      const currentYear = new Date().getFullYear().toString();
+      const ytdIncome = incomeLog.filter(i => i.month.startsWith(currentYear)).reduce((sum, item) => sum + item.net, 0);
+      document.getElementById('kpiYtdTotal').textContent = formatJPYShort(ytdIncome);
+      document.getElementById('kpiYtdYear').textContent = currentYear + " YTD";
+      if(document.getElementById('kpiYtdTotalMobile')) document.getElementById('kpiYtdTotalMobile').textContent = formatJPYShort(ytdIncome);
 
       // Populate Table
-      const tbody = document.getElementById('incomeTableBody');
-      tbody.innerHTML = '';
       incomeLog.slice().reverse().forEach((row, revIdx) => {
         const actualIdx = incomeLog.length - 1 - revIdx;
         const tr = document.createElement('tr');
@@ -631,13 +722,16 @@
       });
 
       renderIncomeChart();
+      renderYoyChart();
       lucide.createIcons();
     }
 
     function renderIncomeChart() {
+      if(incomeLog.length === 0) return;
+      document.getElementById('incomeChartContainer').innerHTML = '<canvas id="incomeChart"></canvas>';
+      
       const isMobile = window.innerWidth < 768;
       
-      // Group by month to handle months that have both salary and bonus
       const monthlyData = {};
       incomeLog.forEach(entry => {
           if (!monthlyData[entry.month]) monthlyData[entry.month] = { salary: 0, bonus: 0 };
@@ -646,9 +740,12 @@
       });
 
       const labels = Object.keys(monthlyData).sort();
-      const displayLabels = labels.map(l => isMobile ? l.substring(5) : l); // short labels for mobile
-      const salaryData = labels.map(l => monthlyData[l].salary);
-      const bonusData = labels.map(l => monthlyData[l].bonus);
+      // Show only last 12 months on chart to keep it clean
+      const recentLabels = labels.slice(-12);
+      
+      const displayLabels = recentLabels.map(l => isMobile ? l.substring(5) : l);
+      const salaryData = recentLabels.map(l => monthlyData[l].salary);
+      const bonusData = recentLabels.map(l => monthlyData[l].bonus);
 
       const ctx = document.getElementById('incomeChart').getContext('2d');
       if (incomeChartInstance) incomeChartInstance.destroy();
@@ -658,26 +755,12 @@
         data: {
           labels: displayLabels,
           datasets: [
-            {
-              label: 'Salary',
-              data: salaryData,
-              backgroundColor: '#3b82f6',
-              borderRadius: 4,
-              barPercentage: 0.6,
-            },
-            {
-              label: 'Bonus',
-              data: bonusData,
-              backgroundColor: '#f59e0b',
-              borderRadius: 4,
-              barPercentage: 0.6,
-            }
+            { label: 'Salary', data: salaryData, backgroundColor: '#3b82f6', borderRadius: 4, barPercentage: 0.6 },
+            { label: 'Bonus', data: bonusData, backgroundColor: '#f59e0b', borderRadius: 4, barPercentage: 0.6 }
           ]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
+          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
             tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}` } }
@@ -685,6 +768,49 @@
           scales: {
             x: { stacked: true, grid: { display: false } },
             y: { stacked: true, ticks: { callback: (v) => (v / 1000).toLocaleString() + 'k' }, grid: { color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }, border: { display: false } }
+          }
+        }
+      });
+    }
+    
+    function renderYoyChart() {
+      if(incomeLog.length === 0) return;
+      document.getElementById('yoyChartContainer').innerHTML = '<canvas id="yoyChart"></canvas>';
+      
+      // Calculate Year over Year Totals
+      const yearlyData = {};
+      incomeLog.forEach(entry => {
+          const year = entry.month.substring(0, 4);
+          if (!yearlyData[year]) yearlyData[year] = { salary: 0, bonus: 0 };
+          if (entry.type === 'salary') yearlyData[year].salary += entry.net;
+          if (entry.type === 'bonus') yearlyData[year].bonus += entry.net;
+      });
+
+      const years = Object.keys(yearlyData).sort();
+      const salaryTotals = years.map(y => yearlyData[y].salary);
+      const bonusTotals = years.map(y => yearlyData[y].bonus);
+
+      const ctx = document.getElementById('yoyChart').getContext('2d');
+      if (yoyChartInstance) yoyChartInstance.destroy();
+      
+      yoyChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: years,
+          datasets: [
+            { label: 'Total Salary', data: salaryTotals, backgroundColor: 'rgba(59, 130, 246, 0.7)', borderColor: '#3b82f6', borderWidth: 2, borderRadius: 4 },
+            { label: 'Total Bonus', data: bonusTotals, backgroundColor: 'rgba(245, 158, 11, 0.7)', borderColor: '#f59e0b', borderWidth: 2, borderRadius: 4 }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}` } }
+          },
+          scales: {
+            x: { stacked: true, grid: { display: false } },
+            y: { stacked: true, ticks: { callback: (v) => (v / 1000000).toFixed(1) + 'M' }, grid: { color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }, border: { display: false } }
           }
         }
       });
@@ -704,7 +830,6 @@
             net: parseFloat(document.getElementById('formIncNet').value) || 0
           };
           
-          // Check if same type exists for that month
           const existingIdx = incomeLog.findIndex(item => item.month === newEntry.month && item.type === newEntry.type);
           if (existingIdx >= 0) incomeLog[existingIdx] = newEntry;
           else incomeLog.push(newEntry);
@@ -718,6 +843,7 @@
           setTimeout(() => {
               submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-xs font-semibold active:scale-[0.98] transition flex items-center justify-center space-x-1.5";
               submitBtn.innerHTML = originalText;
+              document.getElementById('formIncNet').value = '';
               lucide.createIcons();
           }, 1500);
       }, 400);
@@ -750,6 +876,7 @@
           const existingIdx = portfolio.findIndex(item => item.date === newEntry.date);
           if (existingIdx >= 0) portfolio[existingIdx] = newEntry; else portfolio.push(newEntry);
           renderDashboard();
+          evaluateAffordability(); // Update advice if cash changes
           
           submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
           submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Saved!</span>';
@@ -766,18 +893,23 @@
       if (confirm(`Delete record for ${portfolio[index].date}?`)) {
         portfolio.splice(index, 1);
         renderDashboard();
+        evaluateAffordability();
       }
     };
 
     // Affordability
     function evaluateAffordability() {
+        if(portfolio.length === 0) {
+            document.getElementById('affordabilityResult').innerHTML = '<div class="text-slate-500 text-sm text-center py-10">Add portfolio data first to use the calculator.</div>';
+            return;
+        }
+        
         const name = document.getElementById('targetItemName').value.trim() || 'Target Item';
         const cost = parseFloat(document.getElementById('targetItemCost').value) || 0;
         const category = document.getElementById('targetItemCategory').value;
         const latest = portfolio[portfolio.length - 1];
         const currentCash = latest.emergency;
         
-        // Dynamically get average salary from income log, fallback to 270k
         const salaries = incomeLog.filter(i => i.type === 'salary').slice(-6);
         const monthlyNetSalary = salaries.length > 0 ? (salaries.reduce((acc, curr) => acc + curr.net, 0) / salaries.length) : 270000;
         
@@ -880,7 +1012,10 @@
         const isDark = document.documentElement.classList.contains('dark');
         document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
         if (portfolio.length > 0) renderCharts(portfolio[portfolio.length - 1]);
-        if (incomeLog.length > 0 && !document.getElementById('view-income').classList.contains('hidden')) renderIncomeChart();
+        if (incomeLog.length > 0 && !document.getElementById('view-income').classList.contains('hidden')) {
+            renderIncomeChart();
+            renderYoyChart();
+        }
         lucide.createIcons();
     };
     document.getElementById('themeToggle').addEventListener('click', () => {
@@ -902,8 +1037,11 @@
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
-            renderCharts(portfolio[portfolio.length - 1]);
-            if(!document.getElementById('view-income').classList.contains('hidden')) renderIncomeChart();
+            if(portfolio.length > 0) renderCharts(portfolio[portfolio.length - 1]);
+            if(incomeLog.length > 0 && !document.getElementById('view-income').classList.contains('hidden')) {
+                renderIncomeChart();
+                renderYoyChart();
+            }
         }, 250);
     });
   </script>
