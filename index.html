@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href='data:application/manifest+json,{"name":"WealthFlow","short_name":"WealthFlow","start_url":".","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2953/2953363.png","sizes":"512x512","type":"image/png"}]}'>
   
   <!-- Tailwind CSS & Lucide Icons & Chart.js -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -65,6 +65,15 @@
     input[type="text"], input[type="number"], input[type="date"], select {
         font-size: 16px !important;
     }
+    
+    /* Tab active state */
+    .tab-active {
+        border-bottom: 2px solid #10b981;
+        color: #10b981;
+    }
+    .dark .tab-active {
+        color: #34d399;
+    }
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 pb-16 sm:pb-8">
@@ -78,7 +87,7 @@
         </div>
         <div class="truncate">
           <h1 class="text-base sm:text-lg font-bold tracking-tight truncate">WealthFlow</h1>
-          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">Portfolio & Purchase Advisor</p>
+          <p class="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">Portfolio & Income Advisor</p>
         </div>
       </div>
 
@@ -91,221 +100,321 @@
         </button>
       </div>
     </div>
+    
+    <!-- Tab Navigation -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex space-x-6 overflow-x-auto text-sm font-medium text-slate-500 dark:text-slate-400 hide-scrollbar pt-2">
+        <button onclick="switchTab('portfolio')" id="tab-portfolio" class="pb-3 px-1 tab-active transition-colors whitespace-nowrap">Portfolio & Affordability</button>
+        <button onclick="switchTab('income')" id="tab-income" class="pb-3 px-1 hover:text-slate-800 dark:hover:text-slate-200 transition-colors whitespace-nowrap">Income & Salary Log</button>
+      </div>
+    </div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
 
-    <!-- KPI Summary Row - Optimized for Mobile Grid -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-          <span>Net Wealth</span>
-          <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="shield-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
-        </div>
-        <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiNetWealth">¥0</div>
-        <div class="mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center" id="kpiNetWealthGrowth">
-          <i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> Positive Trajectory
-        </div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-          <span class="truncate pr-1">Total Assets</span>
-          <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 flex-shrink-0"><i data-lucide="pie-chart" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
-        </div>
-        <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiTotalAssets">¥0</div>
-        <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate">Cash, NISA, ESOP, DC</div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-          <span class="truncate pr-1">Liabilities</span>
-          <span class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600 flex-shrink-0"><i data-lucide="arrow-down-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
-        </div>
-        <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400" id="kpiPendingDebt">¥0</div>
-        <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate">Loan balance</div>
-      </div>
-      
-      <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1 hidden lg:block">
-        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-          <span>Emergency Reserve</span>
-          <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
-        </div>
-        <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiEmergencyFund">¥0</div>
-        <div class="mt-1 text-[10px] sm:text-xs text-slate-500">Available immediate cash</div>
-      </div>
-    </section>
-
-    <!-- Mobile-only Emergency Fund Card (Visible only on small screens for better layout) -->
-    <section class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm lg:hidden">
-      <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-        <span>Emergency Reserve (Cash)</span>
-        <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5"></i></span>
-      </div>
-      <div class="mt-2 text-xl font-bold" id="kpiEmergencyFundMobile">¥0</div>
-    </section>
-
-    <!-- Charts Section -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-      <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm lg:col-span-2">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h2 class="text-sm sm:text-base font-bold">Net Wealth Progression</h2>
-          </div>
-          <span class="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Monthly</span>
-        </div>
-        <div class="h-60 sm:h-72 w-full">
-          <canvas id="growthChart"></canvas>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-4">
-          <div>
-            <h2 class="text-sm sm:text-base font-bold">Asset Allocation</h2>
-          </div>
-        </div>
-        <div class="h-48 sm:h-64 flex items-center justify-center">
-          <canvas id="allocationChart"></canvas>
-        </div>
-        <div id="allocationLegend" class="grid grid-cols-2 gap-2 mt-4 text-[10px] sm:text-xs"></div>
-      </div>
-    </section>
-
-    <!-- Affordability & Loan/Cash Advisor Section -->
-    <section class="glass-card rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm border border-emerald-500/20 bg-gradient-to-br from-white via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20">
-      <div class="flex items-start sm:items-center space-x-3 mb-5 sm:mb-6">
-        <div class="p-2 sm:p-2.5 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25 flex-shrink-0 mt-1 sm:mt-0">
-          <i data-lucide="sparkles" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-        </div>
-        <div>
-          <h2 class="text-lg sm:text-xl font-bold leading-tight">Can I Afford It?</h2>
-          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluate purchases against your actual liquidity.</p>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
-        <!-- Input Form -->
-        <div class="lg:col-span-5 space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Target item or event</label>
-            <input type="text" id="targetItemName" placeholder="e.g., iPhone 16 Pro, Bike, Home" 
-                   class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none" value="iPhone 16 Pro" />
-          </div>
-
-          <div class="grid grid-cols-2 gap-3 sm:gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Cost (¥ JPY)</label>
-              <input type="number" id="targetItemCost" placeholder="180000" inputmode="numeric" pattern="[0-9]*"
-                     class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none" value="180000" />
+    <!-- ==================== TAB 1: PORTFOLIO & AFFORDABILITY ==================== -->
+    <div id="view-portfolio">
+        <!-- KPI Summary Row - Optimized for Mobile Grid -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span>Net Wealth</span>
+              <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="shield-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Category</label>
-              <select id="targetItemCategory" class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); padding-right: 2.5rem;">
-                <option value="gadget">Tech & Gadgets</option>
-                <option value="vehicle">Vehicle (Bike/Car)</option>
-                <option value="event">Life Event (Marriage/Travel)</option>
-                <option value="property">Real Estate (Home)</option>
-              </select>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiNetWealth">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center" id="kpiNetWealthGrowth">
+              <i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> Positive Trajectory
             </div>
           </div>
 
-          <button id="calculateAffordabilityBtn" class="w-full py-3.5 sm:py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2 mt-2">
-            <i data-lucide="calculator" class="w-4 h-4"></i>
-            <span>Analyze Affordability</span>
-          </button>
-        </div>
-
-        <!-- Result Box -->
-        <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl p-5 sm:p-6 flex flex-col justify-between mt-2 lg:mt-0">
-          <div id="affordabilityResult">
-            <!-- Populated via JS -->
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span class="truncate pr-1">Total Assets</span>
+              <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 flex-shrink-0"><i data-lucide="pie-chart" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
+            </div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiTotalAssets">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate">Cash, NISA, ESOP, DC</div>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Monthly Data Log & Sheet Sync Form -->
-    <section class="glass-card rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm">
-      <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 sm:pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
-        <div>
-          <h2 class="text-base sm:text-lg font-bold">Monthly Portfolio Log</h2>
-          <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Enter monthly updates here. Exports cleanly to CSV.</p>
-        </div>
-        <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-          <button id="exportCsvBtn" class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 dark:active:bg-slate-700 text-xs font-semibold transition flex items-center justify-center space-x-1.5">
-            <i data-lucide="download" class="w-4 h-4"></i>
-            <span>Export CSV</span>
-          </button>
-          <!-- Mobile Scroll hint -->
-          <div class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center space-x-1.5 lg:hidden">
-            <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
-            <span>Scroll table to view all</span>
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span class="truncate pr-1">Liabilities</span>
+              <span class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600 flex-shrink-0"><i data-lucide="arrow-down-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
+            </div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400" id="kpiPendingDebt">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate">Loan balance</div>
           </div>
-        </div>
-      </div>
+          
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1 hidden lg:block">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span>Emergency Reserve</span>
+              <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
+            </div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiEmergencyFund">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500">Available immediate cash</div>
+          </div>
+        </section>
 
-      <!-- Quick Add Form -->
-      <form id="newEntryForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 py-5 sm:py-6">
-        <div class="col-span-2 sm:col-span-1">
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Date (YYYY-MM-DD)</label>
-          <input type="date" id="formDate" required class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Emergency Fund (¥)</label>
-          <input type="number" id="formEmergency" inputmode="numeric" required placeholder="307002" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">NISA Balance (¥)</label>
-          <input type="number" id="formNisa" inputmode="numeric" required placeholder="73355" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">ESOP Balance (¥)</label>
-          <input type="number" id="formEsop" inputmode="numeric" required placeholder="78214" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">DC Pension (¥)</label>
-          <input type="number" id="formDc" inputmode="numeric" required placeholder="60730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
-        </div>
-        <div>
-          <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Pending Loan (¥)</label>
-          <input type="number" id="formLiability" inputmode="numeric" required placeholder="283730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
-        </div>
-        <div class="col-span-2 sm:col-span-3 lg:col-span-6 flex justify-end mt-2 lg:mt-0">
-          <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm sm:text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>Save Record</span>
-          </button>
-        </div>
-      </form>
+        <!-- Mobile-only Emergency Fund Card -->
+        <section class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm lg:hidden mb-6">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+            <span>Emergency Reserve (Cash)</span>
+            <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5"></i></span>
+          </div>
+          <div class="mt-2 text-xl font-bold" id="kpiEmergencyFundMobile">¥0</div>
+        </section>
 
-      <!-- History Table (Responsive horizontally scrolling wrapper) -->
-      <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 pb-1">
-        <table class="w-full text-left text-xs border-collapse min-w-[800px]">
-          <thead>
-            <tr class="bg-slate-100/70 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
-              <th class="p-3.5 whitespace-nowrap">Date</th>
-              <th class="p-3.5 whitespace-nowrap">Emergency</th>
-              <th class="p-3.5 whitespace-nowrap">NISA</th>
-              <th class="p-3.5 whitespace-nowrap">ESOP</th>
-              <th class="p-3.5 whitespace-nowrap">DC Pension</th>
-              <th class="p-3.5 whitespace-nowrap">Total Assets</th>
-              <th class="p-3.5 whitespace-nowrap">Liability</th>
-              <th class="p-3.5 whitespace-nowrap">Net Wealth</th>
-              <th class="p-3.5 text-center whitespace-nowrap">Action</th>
-            </tr>
-          </thead>
-          <tbody id="portfolioTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
-            <!-- Populated via JS -->
-          </tbody>
-        </table>
-      </div>
-    </section>
+        <!-- Charts Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
+          <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm lg:col-span-2">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-sm sm:text-base font-bold">Net Wealth Progression</h2>
+              </div>
+              <span class="text-[10px] sm:text-xs font-medium px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Monthly</span>
+            </div>
+            <div class="h-60 sm:h-72 w-full">
+              <canvas id="growthChart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-sm sm:text-base font-bold">Asset Allocation</h2>
+              </div>
+            </div>
+            <div class="h-48 sm:h-64 flex items-center justify-center">
+              <canvas id="allocationChart"></canvas>
+            </div>
+            <div id="allocationLegend" class="grid grid-cols-2 gap-2 mt-4 text-[10px] sm:text-xs"></div>
+          </div>
+        </section>
+
+        <!-- Affordability & Loan/Cash Advisor Section -->
+        <section class="glass-card rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm border border-emerald-500/20 bg-gradient-to-br from-white via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20 mb-6">
+          <div class="flex items-start sm:items-center space-x-3 mb-5 sm:mb-6">
+            <div class="p-2 sm:p-2.5 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25 flex-shrink-0 mt-1 sm:mt-0">
+              <i data-lucide="sparkles" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+            </div>
+            <div>
+              <h2 class="text-lg sm:text-xl font-bold leading-tight">Can I Afford It?</h2>
+              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluate purchases against your actual liquidity.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
+            <div class="lg:col-span-5 space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Target item or event</label>
+                <input type="text" id="targetItemName" placeholder="e.g., iPhone 16 Pro, Bike, Home" 
+                       class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none" value="iPhone 16 Pro" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Cost (¥ JPY)</label>
+                  <input type="number" id="targetItemCost" placeholder="180000" inputmode="numeric" pattern="[0-9]*"
+                         class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none" value="180000" />
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Category</label>
+                  <select id="targetItemCategory" class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); padding-right: 2.5rem;">
+                    <option value="gadget">Tech & Gadgets</option>
+                    <option value="vehicle">Vehicle (Bike/Car)</option>
+                    <option value="event">Life Event (Marriage/Travel)</option>
+                    <option value="property">Real Estate (Home)</option>
+                  </select>
+                </div>
+              </div>
+
+              <button id="calculateAffordabilityBtn" class="w-full py-3.5 sm:py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2 mt-2">
+                <i data-lucide="calculator" class="w-4 h-4"></i>
+                <span>Analyze Affordability</span>
+              </button>
+            </div>
+
+            <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl p-5 sm:p-6 flex flex-col justify-between mt-2 lg:mt-0">
+              <div id="affordabilityResult"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Monthly Data Log & Sheet Sync Form -->
+        <section class="glass-card rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 sm:pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
+            <div>
+              <h2 class="text-base sm:text-lg font-bold">Monthly Portfolio Log</h2>
+              <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Enter monthly updates here. Exports cleanly to CSV.</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <button id="exportCsvBtn" class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 dark:active:bg-slate-700 text-xs font-semibold transition flex items-center justify-center space-x-1.5">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                <span>Export CSV</span>
+              </button>
+              <div class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center space-x-1.5 lg:hidden">
+                <i data-lucide="arrow-right-left" class="w-4 h-4"></i>
+                <span>Scroll table to view all</span>
+              </div>
+            </div>
+          </div>
+
+          <form id="newEntryForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 py-5 sm:py-6">
+            <div class="col-span-2 sm:col-span-1">
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Date (YYYY-MM-DD)</label>
+              <input type="date" id="formDate" required class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Emergency Fund (¥)</label>
+              <input type="number" id="formEmergency" inputmode="numeric" required placeholder="307002" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">NISA Balance (¥)</label>
+              <input type="number" id="formNisa" inputmode="numeric" required placeholder="73355" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">ESOP Balance (¥)</label>
+              <input type="number" id="formEsop" inputmode="numeric" required placeholder="78214" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">DC Pension (¥)</label>
+              <input type="number" id="formDc" inputmode="numeric" required placeholder="60730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Pending Loan (¥)</label>
+              <input type="number" id="formLiability" inputmode="numeric" required placeholder="283730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+            </div>
+            <div class="col-span-2 sm:col-span-3 lg:col-span-6 flex justify-end mt-2 lg:mt-0">
+              <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm sm:text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Save Record</span>
+              </button>
+            </div>
+          </form>
+
+          <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 pb-1">
+            <table class="w-full text-left text-xs border-collapse min-w-[800px]">
+              <thead>
+                <tr class="bg-slate-100/70 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
+                  <th class="p-3.5 whitespace-nowrap">Date</th>
+                  <th class="p-3.5 whitespace-nowrap">Emergency</th>
+                  <th class="p-3.5 whitespace-nowrap">NISA</th>
+                  <th class="p-3.5 whitespace-nowrap">ESOP</th>
+                  <th class="p-3.5 whitespace-nowrap">DC Pension</th>
+                  <th class="p-3.5 whitespace-nowrap">Total Assets</th>
+                  <th class="p-3.5 whitespace-nowrap">Liability</th>
+                  <th class="p-3.5 whitespace-nowrap">Net Wealth</th>
+                  <th class="p-3.5 text-center whitespace-nowrap">Action</th>
+                </tr>
+              </thead>
+              <tbody id="portfolioTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                <!-- Populated via JS -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+    </div>
+
+    <!-- ==================== TAB 2: INCOME & SALARY LOG ==================== -->
+    <div id="view-income" class="hidden space-y-6 sm:space-y-8">
+        
+        <!-- Income KPIs -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span>Avg Monthly Net Income</span>
+              <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600"><i data-lucide="banknote" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
+            </div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400" id="kpiAvgNet">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500 flex items-center">
+              Based on rolling 12 months
+            </div>
+          </div>
+          
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span>Latest Net Pay</span>
+            </div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiLatestNet">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiLatestMonth">Month</div>
+          </div>
+          
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
+            <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
+              <span>Latest Bonus</span>
+              <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="gift" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
+            </div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-500" id="kpiLatestBonus">¥0</div>
+            <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiBonusMonth">Month</div>
+          </div>
+        </section>
+
+        <!-- Income Charts -->
+        <section class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h2 class="text-sm sm:text-base font-bold">Salary & Bonus Trend (Net JPY)</h2>
+              </div>
+            </div>
+            <div class="h-60 sm:h-80 w-full">
+              <canvas id="incomeChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Income Table & Entry Form -->
+        <section class="glass-card rounded-2xl p-4 sm:p-6 lg:p-8 shadow-sm">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 sm:pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
+                <div>
+                  <h2 class="text-base sm:text-lg font-bold">Income & Bonus Log</h2>
+                  <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Track your net monthly pay and bonuses.</p>
+                </div>
+            </div>
+            
+            <form id="newIncomeForm" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 py-5 sm:py-6">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Date (Month)</label>
+                  <input type="month" id="formIncDate" required class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Type</label>
+                  <select id="formIncType" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none bg-no-repeat bg-[right_1rem_center] bg-[length:1em_1em]" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); padding-right: 2.5rem;">
+                      <option value="salary">Salary</option>
+                      <option value="bonus">Bonus</option>
+                  </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Net Income (¥)</label>
+                  <input type="number" id="formIncNet" inputmode="numeric" required placeholder="270000" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
+                </div>
+                <div class="col-span-2 sm:col-span-1 lg:col-span-2 flex justify-end mt-2 sm:mt-0 items-end">
+                  <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-xs font-semibold active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                    <span>Log Income</span>
+                  </button>
+                </div>
+            </form>
+
+            <div class="table-scroll overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 pb-1">
+              <table class="w-full text-left text-xs border-collapse min-w-[500px]">
+                <thead>
+                  <tr class="bg-slate-100/70 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
+                    <th class="p-3.5 whitespace-nowrap">Month</th>
+                    <th class="p-3.5 whitespace-nowrap">Type</th>
+                    <th class="p-3.5 whitespace-nowrap text-right">Net Income (JPY)</th>
+                    <th class="p-3.5 text-center whitespace-nowrap">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="incomeTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  <!-- Populated via JS -->
+                </tbody>
+              </table>
+            </div>
+        </section>
+    </div>
 
   </main>
 
   <script>
-    // Configuration & meta tag adjustment for better mobile display scaling
     const setMobileViewportHeight = () => {
         const doc = document.documentElement;
         doc.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
@@ -313,7 +422,19 @@
     window.addEventListener('resize', setMobileViewportHeight);
     setMobileViewportHeight();
 
-    // --- Initial Seed Data from your Monthly Savings Sheets ---
+    // --- Tab Switching Logic ---
+    function switchTab(tabName) {
+        document.getElementById('view-portfolio').classList.toggle('hidden', tabName !== 'portfolio');
+        document.getElementById('view-income').classList.toggle('hidden', tabName !== 'income');
+        
+        document.getElementById('tab-portfolio').className = `pb-3 px-1 whitespace-nowrap transition-colors ${tabName === 'portfolio' ? 'tab-active' : 'hover:text-slate-800 dark:hover:text-slate-200'}`;
+        document.getElementById('tab-income').className = `pb-3 px-1 whitespace-nowrap transition-colors ${tabName === 'income' ? 'tab-active' : 'hover:text-slate-800 dark:hover:text-slate-200'}`;
+        
+        if(tabName === 'income') renderIncomeDashboard();
+        if(tabName === 'portfolio') renderDashboard();
+    }
+
+    // --- Data Store ---
     const initialPortfolioData = [
       { date: '2026-05-31', dc: 20190, esop: 10876.2, nisa: 21626, emergency: 154956, liability: 594082 },
       { date: '2026-06-30', dc: 23601, esop: 22004.8, nisa: 31834, emergency: 254956, liability: 594082 },
@@ -323,25 +444,34 @@
       { date: '2026-09-30', dc: 50023, esop: 67071.9, nisa: 63449, emergency: 257002, liability: 283730 },
       { date: '2026-10-30', dc: 60730, esop: 78214.3, nisa: 73355, emergency: 307002, liability: 283730 }
     ];
+    
+    // Seeded from your provided Sheet1 rows 21-32
+    const initialIncomeData = [
+      { month: '2025-12', type: 'salary', net: 227176 },
+      { month: '2026-01', type: 'salary', net: 282231 },
+      { month: '2026-02', type: 'salary', net: 265193 },
+      { month: '2026-03', type: 'salary', net: 260559 },
+      { month: '2026-04', type: 'salary', net: 283121 },
+      { month: '2026-05', type: 'salary', net: 245140 },
+      { month: '2026-06', type: 'salary', net: 270681 },
+      { month: '2026-07', type: 'salary', net: 287143 },
+      { month: '2026-07', type: 'bonus', net: 243098 },
+      { month: '2026-08', type: 'salary', net: 273195 },
+      { month: '2026-09', type: 'salary', net: 264314 },
+      { month: '2026-10', type: 'salary', net: 270899 }
+    ];
 
     let portfolio = JSON.parse(localStorage.getItem('wealthflow_portfolio')) || initialPortfolioData;
+    let incomeLog = JSON.parse(localStorage.getItem('wealthflow_income')) || initialIncomeData;
 
-    // Format Currency Helper (JPY)
-    function formatJPY(val) {
-      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(val);
-    }
-    
-    // Abbreviated format for small screens (e.g. 300K instead of 300,000)
-    function formatJPYShort(val) {
-      if(window.innerWidth < 640 && Math.abs(val) >= 10000) {
-          return '¥' + (val / 1000).toFixed(0) + 'k';
-      }
-      return formatJPY(val);
-    }
+    function formatJPY(val) { return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(val); }
+    function formatJPYShort(val) { return (window.innerWidth < 640 && Math.abs(val) >= 10000) ? '¥' + (val / 1000).toFixed(0) + 'k' : formatJPY(val); }
 
     let growthChartInstance = null;
     let allocationChartInstance = null;
+    let incomeChartInstance = null;
 
+    // ================== PORTFOLIO LOGIC ==================
     function calculateMetrics(entry) {
       const totalAssets = entry.emergency + entry.nisa + entry.esop + entry.dc;
       const netWealth = totalAssets - entry.liability;
@@ -349,29 +479,25 @@
     }
 
     function renderDashboard() {
-      // Sort portfolio by date
       portfolio.sort((a, b) => new Date(a.date) - new Date(b.date));
       localStorage.setItem('wealthflow_portfolio', JSON.stringify(portfolio));
 
+      if (portfolio.length === 0) return;
+
       const latest = portfolio[portfolio.length - 1];
       const prev = portfolio.length > 1 ? portfolio[portfolio.length - 2] : latest;
-
       const latestMetrics = calculateMetrics(latest);
       const prevMetrics = calculateMetrics(prev);
 
-      // Update KPI Cards
       document.getElementById('kpiNetWealth').textContent = formatJPYShort(latestMetrics.netWealth);
       document.getElementById('kpiTotalAssets').textContent = formatJPYShort(latestMetrics.totalAssets);
       document.getElementById('kpiPendingDebt').textContent = formatJPYShort(latest.liability);
-      
-      // Update both desktop and mobile Emergency cards
       document.getElementById('kpiEmergencyFund').textContent = formatJPYShort(latest.emergency);
       const mobElem = document.getElementById('kpiEmergencyFundMobile');
       if(mobElem) mobElem.textContent = formatJPYShort(latest.emergency);
 
       const netWealthDiff = latestMetrics.netWealth - prevMetrics.netWealth;
       const growthEl = document.getElementById('kpiNetWealthGrowth');
-      
       if (netWealthDiff >= 0) {
         growthEl.className = "mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center";
         growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> +${formatJPYShort(netWealthDiff)} since last month`;
@@ -380,7 +506,6 @@
         growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> ${formatJPYShort(netWealthDiff)} since last month`;
       }
 
-      // Render Table Rows
       const tbody = document.getElementById('portfolioTableBody');
       tbody.innerHTML = '';
       portfolio.slice().reverse().forEach((row, revIdx) => {
@@ -398,9 +523,7 @@
           <td class="p-3.5 font-medium text-rose-500 whitespace-nowrap">${formatJPY(row.liability)}</td>
           <td class="p-3.5 font-bold ${m.netWealth >= 0 ? 'text-emerald-600' : 'text-amber-500'} whitespace-nowrap">${formatJPY(m.netWealth)}</td>
           <td class="p-3.5 text-center">
-            <button onclick="deleteEntry(${actualIdx})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition active:scale-95" aria-label="Delete Entry">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-            </button>
+            <button onclick="deleteEntry(${actualIdx})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition active:scale-95"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -412,308 +535,204 @@
 
     function renderCharts(latest) {
       const isMobile = window.innerWidth < 768;
-      const dates = portfolio.map(e => isMobile ? e.date.substring(5) : e.date); // Show only MM-DD on mobile
+      const dates = portfolio.map(e => isMobile ? e.date.substring(5) : e.date);
       const netWealths = portfolio.map(e => calculateMetrics(e).netWealth);
       const totalAssets = portfolio.map(e => calculateMetrics(e).totalAssets);
       const liabilities = portfolio.map(e => e.liability);
 
-      // 1. Growth Area Chart
-      const ctxGrowth = document.getElementById('growthChart').getContext('2d');
-      if (growthChartInstance) growthChartInstance.destroy();
-
-      // Chart.js default font sizes setup
       Chart.defaults.font.size = isMobile ? 10 : 12;
       Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
       Chart.defaults.color = document.documentElement.classList.contains('dark') ? '#94a3b8' : '#64748b';
 
+      const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+      if (growthChartInstance) growthChartInstance.destroy();
       growthChartInstance = new Chart(ctxGrowth, {
         type: 'line',
         data: {
           labels: dates,
           datasets: [
+            { label: 'Net Wealth', data: netWealths, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.12)', borderWidth: isMobile ? 2 : 2.5, tension: 0.35, fill: true, pointBackgroundColor: '#10b981', pointRadius: isMobile ? 3 : 4, pointHitRadius: 10 },
+            { label: 'Assets', data: totalAssets, borderColor: '#3b82f6', borderDash: [4, 4], borderWidth: isMobile ? 1.5 : 2, pointRadius: 0, pointHitRadius: 10, tension: 0.35, fill: false },
+            { label: 'Loan', data: liabilities, borderColor: '#f43f5e', borderWidth: isMobile ? 1.5 : 2, pointRadius: 0, pointHitRadius: 10, tension: 0.35, fill: false }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}` } }
+          },
+          scales: {
+            y: { ticks: { callback: (v) => (v / 1000).toLocaleString() + 'k', maxTicksLimit: isMobile ? 5 : 8 }, grid: { color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }, border: { display: false } },
+            x: { grid: { display: false }, ticks: { maxTicksLimit: isMobile ? 4 : 8 } }
+          }
+        }
+      });
+
+      const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
+      if (allocationChartInstance) allocationChartInstance.destroy();
+      const allocData = [latest.emergency, latest.nisa, latest.esop, latest.dc];
+      const allocLabels = ['Cash', 'NISA', 'ESOP', 'Pension'];
+      const allocColors = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
+      allocationChartInstance = new Chart(ctxAlloc, {
+        type: 'doughnut',
+        data: { labels: allocLabels, datasets: [{ data: allocData, backgroundColor: allocColors, borderWidth: 2, borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff', hoverOffset: isMobile ? 2 : 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, layout: { padding: 10 }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.label}: ${formatJPY(ctx.parsed)} (${((ctx.parsed / allocData.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)` } } }, cutout: isMobile ? '65%' : '72%' }
+      });
+      document.getElementById('allocationLegend').innerHTML = allocLabels.map((lbl, idx) => `<div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span><div class="flex flex-col"><span class="text-slate-500 font-medium">${lbl}</span><span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / allocData.reduce((a,b)=>a+b,0)) * 100).toFixed(1)}%</span></div></div>`).join('');
+    }
+
+    // ================== INCOME LOGIC ==================
+    function renderIncomeDashboard() {
+      incomeLog.sort((a, b) => new Date(a.month) - new Date(b.month));
+      localStorage.setItem('wealthflow_income', JSON.stringify(incomeLog));
+
+      if (incomeLog.length === 0) return;
+
+      // Extract Salaries vs Bonuses
+      const salaries = incomeLog.filter(i => i.type === 'salary');
+      const bonuses = incomeLog.filter(i => i.type === 'bonus');
+
+      // KPIs
+      let avgNet = 0;
+      if (salaries.length > 0) {
+        const last12 = salaries.slice(-12);
+        avgNet = last12.reduce((acc, curr) => acc + curr.net, 0) / last12.length;
+        document.getElementById('kpiAvgNet').textContent = formatJPYShort(avgNet);
+        document.getElementById('kpiLatestNet').textContent = formatJPYShort(salaries[salaries.length - 1].net);
+        document.getElementById('kpiLatestMonth').textContent = salaries[salaries.length - 1].month;
+      }
+      if (bonuses.length > 0) {
+        document.getElementById('kpiLatestBonus').textContent = formatJPYShort(bonuses[bonuses.length - 1].net);
+        document.getElementById('kpiBonusMonth').textContent = bonuses[bonuses.length - 1].month;
+      }
+
+      // Populate Table
+      const tbody = document.getElementById('incomeTableBody');
+      tbody.innerHTML = '';
+      incomeLog.slice().reverse().forEach((row, revIdx) => {
+        const actualIdx = incomeLog.length - 1 - revIdx;
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition cursor-default";
+        
+        const typeBadge = row.type === 'salary' 
+            ? `<span class="px-2 py-1 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 font-semibold text-[10px] uppercase">Salary</span>`
+            : `<span class="px-2 py-1 rounded bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-400 font-semibold text-[10px] uppercase">Bonus</span>`;
+            
+        tr.innerHTML = `
+          <td class="p-3.5 font-semibold whitespace-nowrap">${row.month}</td>
+          <td class="p-3.5 whitespace-nowrap">${typeBadge}</td>
+          <td class="p-3.5 font-bold text-slate-800 dark:text-slate-100 text-right whitespace-nowrap">${formatJPY(row.net)}</td>
+          <td class="p-3.5 text-center">
+            <button onclick="deleteIncomeEntry(${actualIdx})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition active:scale-95"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderIncomeChart();
+      lucide.createIcons();
+    }
+
+    function renderIncomeChart() {
+      const isMobile = window.innerWidth < 768;
+      
+      // Group by month to handle months that have both salary and bonus
+      const monthlyData = {};
+      incomeLog.forEach(entry => {
+          if (!monthlyData[entry.month]) monthlyData[entry.month] = { salary: 0, bonus: 0 };
+          if (entry.type === 'salary') monthlyData[entry.month].salary += entry.net;
+          if (entry.type === 'bonus') monthlyData[entry.month].bonus += entry.net;
+      });
+
+      const labels = Object.keys(monthlyData).sort();
+      const displayLabels = labels.map(l => isMobile ? l.substring(5) : l); // short labels for mobile
+      const salaryData = labels.map(l => monthlyData[l].salary);
+      const bonusData = labels.map(l => monthlyData[l].bonus);
+
+      const ctx = document.getElementById('incomeChart').getContext('2d');
+      if (incomeChartInstance) incomeChartInstance.destroy();
+      
+      incomeChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: displayLabels,
+          datasets: [
             {
-              label: 'Net Wealth',
-              data: netWealths,
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16, 185, 129, 0.12)',
-              borderWidth: isMobile ? 2 : 2.5,
-              tension: 0.35,
-              fill: true,
-              pointBackgroundColor: '#10b981',
-              pointRadius: isMobile ? 3 : 4,
-              pointHitRadius: 10
+              label: 'Salary',
+              data: salaryData,
+              backgroundColor: '#3b82f6',
+              borderRadius: 4,
+              barPercentage: 0.6,
             },
             {
-              label: 'Assets',
-              data: totalAssets,
-              borderColor: '#3b82f6',
-              borderDash: [4, 4],
-              borderWidth: isMobile ? 1.5 : 2,
-              pointRadius: 0,
-              pointHitRadius: 10,
-              tension: 0.35,
-              fill: false
-            },
-            {
-              label: 'Loan',
-              data: liabilities,
-              borderColor: '#f43f5e',
-              borderWidth: isMobile ? 1.5 : 2,
-              pointRadius: 0,
-              pointHitRadius: 10,
-              tension: 0.35,
-              fill: false
+              label: 'Bonus',
+              data: bonusData,
+              backgroundColor: '#f59e0b',
+              borderRadius: 4,
+              barPercentage: 0.6,
             }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          interaction: {
-              mode: 'index',
-              intersect: false,
-          },
+          interaction: { mode: 'index', intersect: false },
           plugins: {
-            legend: { 
-                position: 'top', 
-                labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } 
-            },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-              titleFont: { size: 13 },
-              bodyFont: { size: 12 },
-              padding: 10,
-              cornerRadius: 8,
-              callbacks: {
-                label: (ctx) => ` ${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}`
-              }
-            }
+            legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}` } }
           },
           scales: {
-            y: {
-              ticks: { 
-                  callback: (v) => (v / 1000).toLocaleString() + 'k',
-                  maxTicksLimit: isMobile ? 5 : 8
-              },
-              grid: { color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' },
-              border: { display: false }
-            },
-            x: { 
-                grid: { display: false },
-                ticks: { maxTicksLimit: isMobile ? 4 : 8 }
-            }
+            x: { stacked: true, grid: { display: false } },
+            y: { stacked: true, ticks: { callback: (v) => (v / 1000).toLocaleString() + 'k' }, grid: { color: document.documentElement.classList.contains('dark') ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)' }, border: { display: false } }
           }
         }
       });
-
-      // 2. Allocation Doughnut Chart
-      const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
-      if (allocationChartInstance) allocationChartInstance.destroy();
-
-      const allocData = [latest.emergency, latest.nisa, latest.esop, latest.dc];
-      const allocLabels = ['Cash', 'NISA', 'ESOP', 'Pension'];
-      const allocColors = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
-
-      allocationChartInstance = new Chart(ctxAlloc, {
-        type: 'doughnut',
-        data: {
-          labels: allocLabels,
-          datasets: [{
-            data: allocData,
-            backgroundColor: allocColors,
-            borderWidth: 2,
-            borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff',
-            hoverOffset: isMobile ? 2 : 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: 10 },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-              padding: 10,
-              cornerRadius: 8,
-              callbacks: {
-                label: (ctx) => ` ${ctx.label}: ${formatJPY(ctx.parsed)} (${((ctx.parsed / allocData.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`
-              }
-            }
-          },
-          cutout: isMobile ? '65%' : '72%'
-        }
-      });
-
-      // Build custom legend
-      const totalAlloc = allocData.reduce((a, b) => a + b, 0);
-      const legContainer = document.getElementById('allocationLegend');
-      legContainer.innerHTML = allocLabels.map((lbl, idx) => `
-        <div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg">
-          <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span>
-          <div class="flex flex-col">
-              <span class="text-slate-500 font-medium">${lbl}</span>
-              <span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span>
-          </div>
-        </div>
-      `).join('');
     }
 
-    // Affordability Decision Engine
-    function evaluateAffordability() {
-      const name = document.getElementById('targetItemName').value.trim() || 'Target Item';
-      const cost = parseFloat(document.getElementById('targetItemCost').value) || 0;
-      const category = document.getElementById('targetItemCategory').value;
-
-      const latest = portfolio[portfolio.length - 1];
-      const currentCash = latest.emergency;
-      const monthlyNetSalary = 270000; // Average net salary based on your records
-      const baselineEmergencyBuffer = 200000; // Minimum safety buffer to keep untouched
-      const usableLiquidCash = Math.max(0, currentCash - baselineEmergencyBuffer);
-
-      let canAfford = false;
-      let cashToPay = 0;
-      let loanAmount = 0;
-      let verdictTitle = "";
-      let verdictColor = "";
-      let rationale = "";
-      let recommendations = [];
-
-      switch (category) {
-        case 'gadget': 
-          if (cost <= usableLiquidCash) {
-            canAfford = true;
-            cashToPay = cost;
-            verdictTitle = "Affordable (100% Cash)";
-            verdictColor = "text-emerald-600 dark:text-emerald-400";
-            rationale = `You can buy <strong>${name}</strong> outright without breaching your ${formatJPY(baselineEmergencyBuffer)} emergency buffer.`;
-            recommendations.push("Pay 100% in cash. Avoid consumer EMI for tech gadgets.");
-            recommendations.push(`Post-purchase cash reserve: <strong>${formatJPY(currentCash - cost)}</strong>.`);
-          } else {
-            canAfford = false;
-            const shortfall = cost - usableLiquidCash;
-            const monthsToSave = Math.ceil(shortfall / 40000); 
-            verdictTitle = "Not Recommended Right Now";
-            verdictColor = "text-rose-600 dark:text-rose-400";
-            rationale = `Buying ${name} in cash right now would dip into your essential emergency buffer.`;
-            recommendations.push("<strong>Avoid EMI loans</strong> for consumer electronics.");
-            recommendations.push(`Save approx ¥40,000/mo for <strong>${monthsToSave} more month(s)</strong> first.`);
-          }
-          break;
-
-        case 'vehicle': 
-          const vehicleDownPayment = Math.min(cost * 0.4, usableLiquidCash);
-          const vehicleLoan = cost - vehicleDownPayment;
-          const estimatedBikeEmi = vehicleLoan > 0 ? (vehicleLoan * 1.04) / 24 : 0; 
-
-          if (usableLiquidCash >= cost * 0.3 && estimatedBikeEmi <= (monthlyNetSalary * 0.15)) {
-            canAfford = true;
-            cashToPay = Math.round(vehicleDownPayment);
-            loanAmount = Math.round(vehicleLoan);
-            verdictTitle = "Affordable with Auto Loan";
-            verdictColor = "text-emerald-600 dark:text-emerald-400";
-            rationale = `You can finance <strong>${name}</strong> safely with a hybrid approach.`;
-            recommendations.push(`Down Payment: <strong>${formatJPY(cashToPay)}</strong>.`);
-            recommendations.push(`Auto Loan: <strong>${formatJPY(loanAmount)}</strong> (Est EMI: ~${formatJPY(estimatedBikeEmi)}/mo).`);
-          } else {
-            canAfford = false;
-            verdictTitle = "Wait & Save Larger Down Payment";
-            verdictColor = "text-amber-500";
-            const downShortfall = (cost * 0.4) - usableLiquidCash;
-            rationale = `Your liquid cash is below the recommended 40% down payment buffer for vehicles.`;
-            recommendations.push(`Save an additional <strong>${formatJPY(Math.max(0, downShortfall))}</strong> in cash before proceeding.`);
-          }
-          break;
-
-        case 'event': 
-          if (usableLiquidCash >= cost) {
-            canAfford = true;
-            cashToPay = cost;
-            verdictTitle = "Affordable in Cash";
-            verdictColor = "text-emerald-600";
-            rationale = `Your savings fully cover <strong>${name}</strong> without borrowing.`;
-            recommendations.push("Pay 100% from savings. Never take personal loans for weddings/travel.");
-          } else {
-            canAfford = false;
-            const weddingShortfall = cost - usableLiquidCash;
-            const monthsNeeded = Math.ceil(weddingShortfall / 60000);
-            verdictTitle = "Requires Target Savings Plan";
-            verdictColor = "text-rose-500";
-            rationale = `Personal loans for lifestyle events carry toxic 10-15% interest rates.`;
-            recommendations.push(`<strong>Cash Shortfall:</strong> ${formatJPY(weddingShortfall)}.`);
-            recommendations.push(`Reallocate ¥60,000/mo into cash for <strong>${monthsNeeded} months</strong>.`);
-          }
-          break;
-
-        case 'property': 
-          const reqDown = cost * 0.15;
-          const mortAmount = cost * 0.85;
-          const estMortgageEmi = (mortAmount * 0.012) / 12 + (mortAmount / 360); 
-
-          if (usableLiquidCash >= reqDown && estMortgageEmi <= (monthlyNetSalary * 0.30)) {
-            canAfford = true;
-            cashToPay = Math.round(reqDown);
-            loanAmount = Math.round(mortAmount);
-            verdictTitle = "Feasible Home Purchase";
-            verdictColor = "text-emerald-600";
-            rationale = `Meets the 15% down payment test and mortgage is within safe limits.`;
-            recommendations.push(`Cash Down Payment: <strong>${formatJPY(cashToPay)}</strong>.`);
-            recommendations.push(`Mortgage: <strong>${formatJPY(loanAmount)}</strong> (Est ~${formatJPY(estMortgageEmi)}/mo).`);
-          } else {
-            canAfford = false;
-            verdictTitle = "Keep Accumulating Seed Down Payment";
-            verdictColor = "text-amber-500";
-            const downShortfall = reqDown - usableLiquidCash;
-            rationale = `Property requires at least 15% down payment (${formatJPY(reqDown)}).`;
-            recommendations.push(`<strong>Shortfall:</strong> ${formatJPY(Math.max(0, downShortfall))}.`);
-            recommendations.push(`Continue compounding NISA & ESOP to reach the lump sum.`);
-          }
-          break;
-      }
-
-      // Display results
-      const resContainer = document.getElementById('affordabilityResult');
-      resContainer.innerHTML = `
-        <div class="space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700/50 gap-2">
-            <div>
-              <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Analysis Verdict</span>
-              <h3 class="text-base sm:text-lg font-bold ${verdictColor} mt-0.5">${verdictTitle}</h3>
-            </div>
-            <div class="sm:text-right">
-              <span class="text-[10px] sm:text-xs text-slate-400">Total Outlay</span>
-              <div class="text-sm sm:text-base font-bold">${formatJPY(cost)}</div>
-            </div>
-          </div>
-
-          <p class="text-[13px] sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${rationale}</p>
-
-          <div class="grid grid-cols-2 gap-3 py-2">
-            <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
-              <span class="text-[10px] sm:text-[11px] font-semibold text-slate-400 block uppercase tracking-wide">Rec. Cash</span>
-              <span class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mt-1 block">${formatJPY(cashToPay)}</span>
-            </div>
-            <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
-              <span class="text-[10px] sm:text-[11px] font-semibold text-slate-400 block uppercase tracking-wide">Rec. Loan</span>
-              <span class="text-base sm:text-lg font-bold ${loanAmount > 0 ? 'text-amber-600' : 'text-slate-400'} mt-1 block">${formatJPY(loanAmount)}</span>
-            </div>
-          </div>
-
-          <div class="bg-slate-100/50 dark:bg-slate-800/50 p-3 sm:p-4 rounded-xl mt-2">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2 block flex items-center"><i data-lucide="info" class="w-3.5 h-3.5 mr-1.5 text-blue-500"></i> Advisor Notes:</span>
-            <ul class="text-[11px] sm:text-xs space-y-2 text-slate-600 dark:text-slate-300">
-              ${recommendations.map(r => `<li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 mr-2 flex-shrink-0 mt-0.5"></i><span class="leading-relaxed">${r}</span></li>`).join('')}
-            </ul>
-          </div>
-        </div>
-      `;
+    document.getElementById('newIncomeForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Logging...</span>';
       lucide.createIcons();
-    }
+      
+      setTimeout(() => {
+          const newEntry = {
+            month: document.getElementById('formIncDate').value,
+            type: document.getElementById('formIncType').value,
+            net: parseFloat(document.getElementById('formIncNet').value) || 0
+          };
+          
+          // Check if same type exists for that month
+          const existingIdx = incomeLog.findIndex(item => item.month === newEntry.month && item.type === newEntry.type);
+          if (existingIdx >= 0) incomeLog[existingIdx] = newEntry;
+          else incomeLog.push(newEntry);
 
-    // Form submission handler
+          renderIncomeDashboard();
+          
+          submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
+          submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Logged!</span>';
+          lucide.createIcons();
+          
+          setTimeout(() => {
+              submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-xs font-semibold active:scale-[0.98] transition flex items-center justify-center space-x-1.5";
+              submitBtn.innerHTML = originalText;
+              lucide.createIcons();
+          }, 1500);
+      }, 400);
+    });
+
+    window.deleteIncomeEntry = function(index) {
+      if (confirm(`Delete ${incomeLog[index].type} record for ${incomeLog[index].month}?`)) {
+        incomeLog.splice(index, 1);
+        renderIncomeDashboard();
+      }
+    };
+    
+    // --- Portfolio Submission ---
     document.getElementById('newEntryForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Saving...</span>';
@@ -728,32 +747,21 @@
             dc: parseFloat(document.getElementById('formDc').value) || 0,
             liability: parseFloat(document.getElementById('formLiability').value) || 0
           };
-
           const existingIdx = portfolio.findIndex(item => item.date === newEntry.date);
-          if (existingIdx >= 0) {
-            portfolio[existingIdx] = newEntry;
-          } else {
-            portfolio.push(newEntry);
-          }
-
+          if (existingIdx >= 0) portfolio[existingIdx] = newEntry; else portfolio.push(newEntry);
           renderDashboard();
-          evaluateAffordability();
           
-          // Provide visual feedback instead of an annoying alert on mobile
           submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
-          submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Saved Successfully!</span>';
+          submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Saved!</span>';
           lucide.createIcons();
-          
           setTimeout(() => {
               submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-sm sm:text-xs font-semibold hover:opacity-90 active:scale-[0.98] transition flex items-center justify-center space-x-1.5";
               submitBtn.innerHTML = originalText;
               lucide.createIcons();
-          }, 2000);
-          
-      }, 400); // slight simulated delay for tactile UX
+          }, 1500);
+      }, 400);
     });
 
-    // Delete Entry Helper
     window.deleteEntry = function(index) {
       if (confirm(`Delete record for ${portfolio[index].date}?`)) {
         portfolio.splice(index, 1);
@@ -761,72 +769,141 @@
       }
     };
 
-    // CSV Export Handler
-    document.getElementById('exportCsvBtn').addEventListener('click', () => {
-      let csv = 'YYYY/MM/DD,Emergency Fund/Balance,NISA/balance,ESOP/balance,DC Pension Fund/Balance,liability/pending,Total Assets,Total Net Wealth\n';
-      portfolio.forEach(row => {
-        const m = calculateMetrics(row);
-        csv += `${row.date},${row.emergency},${row.nisa},${row.esop},${row.dc},${row.liability},${m.totalAssets},${m.netWealth}\n`;
-      });
+    // Affordability
+    function evaluateAffordability() {
+        const name = document.getElementById('targetItemName').value.trim() || 'Target Item';
+        const cost = parseFloat(document.getElementById('targetItemCost').value) || 0;
+        const category = document.getElementById('targetItemCategory').value;
+        const latest = portfolio[portfolio.length - 1];
+        const currentCash = latest.emergency;
+        
+        // Dynamically get average salary from income log, fallback to 270k
+        const salaries = incomeLog.filter(i => i.type === 'salary').slice(-6);
+        const monthlyNetSalary = salaries.length > 0 ? (salaries.reduce((acc, curr) => acc + curr.net, 0) / salaries.length) : 270000;
+        
+        const baselineEmergencyBuffer = 200000;
+        const usableLiquidCash = Math.max(0, currentCash - baselineEmergencyBuffer);
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `WealthFlow_Export_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        let canAfford = false; let cashToPay = 0; let loanAmount = 0; let verdictTitle = ""; let verdictColor = ""; let rationale = ""; let recommendations = [];
+
+        switch (category) {
+            case 'gadget': 
+                if (cost <= usableLiquidCash) {
+                    cashToPay = cost; verdictTitle = "Affordable (100% Cash)"; verdictColor = "text-emerald-600 dark:text-emerald-400";
+                    rationale = `You can buy <strong>${name}</strong> outright without breaching your ${formatJPY(baselineEmergencyBuffer)} emergency buffer.`;
+                    recommendations.push("Pay 100% in cash. Avoid consumer EMI.");
+                } else {
+                    const shortfall = cost - usableLiquidCash; const monthsToSave = Math.ceil(shortfall / (monthlyNetSalary * 0.15)); 
+                    verdictTitle = "Not Recommended Right Now"; verdictColor = "text-rose-600 dark:text-rose-400";
+                    rationale = `Buying ${name} in cash right now dips into your essential buffer.`;
+                    recommendations.push(`Save approx ${formatJPY(monthlyNetSalary*0.15)}/mo for <strong>${monthsToSave} more month(s)</strong> first.`);
+                }
+                break;
+            case 'vehicle': 
+                const vehicleDownPayment = Math.min(cost * 0.4, usableLiquidCash); const vehicleLoan = cost - vehicleDownPayment;
+                const estimatedBikeEmi = vehicleLoan > 0 ? (vehicleLoan * 1.04) / 24 : 0; 
+                if (usableLiquidCash >= cost * 0.3 && estimatedBikeEmi <= (monthlyNetSalary * 0.15)) {
+                    cashToPay = Math.round(vehicleDownPayment); loanAmount = Math.round(vehicleLoan);
+                    verdictTitle = "Affordable with Auto Loan"; verdictColor = "text-emerald-600 dark:text-emerald-400";
+                    rationale = `You can finance <strong>${name}</strong> safely.`;
+                    recommendations.push(`Down Payment: <strong>${formatJPY(cashToPay)}</strong>.`);
+                    recommendations.push(`Auto Loan: <strong>${formatJPY(loanAmount)}</strong> (Est EMI: ~${formatJPY(estimatedBikeEmi)}/mo).`);
+                } else {
+                    verdictTitle = "Wait & Save Larger Down"; verdictColor = "text-amber-500";
+                    rationale = `Liquid cash is below recommended 40% down payment buffer.`;
+                    recommendations.push(`Save an additional <strong>${formatJPY(Math.max(0, (cost * 0.4) - usableLiquidCash))}</strong> in cash.`);
+                }
+                break;
+            case 'event': 
+                if (usableLiquidCash >= cost) {
+                    cashToPay = cost; verdictTitle = "Affordable in Cash"; verdictColor = "text-emerald-600";
+                    rationale = `Your savings fully cover <strong>${name}</strong>.`;
+                    recommendations.push("Pay 100% from savings. Never take personal loans for events.");
+                } else {
+                    verdictTitle = "Requires Savings Plan"; verdictColor = "text-rose-500";
+                    rationale = `Personal loans carry toxic 10-15% interest rates.`;
+                    recommendations.push(`<strong>Cash Shortfall:</strong> ${formatJPY(cost - usableLiquidCash)}.`);
+                }
+                break;
+            case 'property': 
+                const reqDown = cost * 0.15; const mortAmount = cost * 0.85;
+                const estMortgageEmi = (mortAmount * 0.012) / 12 + (mortAmount / 360); 
+                if (usableLiquidCash >= reqDown && estMortgageEmi <= (monthlyNetSalary * 0.30)) {
+                    cashToPay = Math.round(reqDown); loanAmount = Math.round(mortAmount);
+                    verdictTitle = "Feasible Home Purchase"; verdictColor = "text-emerald-600";
+                    rationale = `Meets 15% down payment test & mortgage is within limits.`;
+                    recommendations.push(`Down Payment: <strong>${formatJPY(cashToPay)}</strong>.`);
+                    recommendations.push(`Mortgage: <strong>${formatJPY(loanAmount)}</strong> (Est ~${formatJPY(estMortgageEmi)}/mo).`);
+                } else {
+                    verdictTitle = "Accumulate Seed Down Payment"; verdictColor = "text-amber-500";
+                    rationale = `Property requires at least 15% down payment (${formatJPY(reqDown)}).`;
+                    recommendations.push(`<strong>Shortfall:</strong> ${formatJPY(Math.max(0, reqDown - usableLiquidCash))}.`);
+                }
+                break;
+        }
+
+        document.getElementById('affordabilityResult').innerHTML = `
+            <div class="space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700/50 gap-2">
+                <div><span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Verdict</span>
+                <h3 class="text-base sm:text-lg font-bold ${verdictColor} mt-0.5">${verdictTitle}</h3></div>
+                <div class="sm:text-right"><span class="text-[10px] sm:text-xs text-slate-400">Total Outlay</span>
+                <div class="text-sm sm:text-base font-bold">${formatJPY(cost)}</div></div>
+              </div>
+              <p class="text-[13px] sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${rationale}</p>
+              <div class="grid grid-cols-2 gap-3 py-2">
+                <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm"><span class="text-[10px] font-semibold text-slate-400 block uppercase">Rec. Cash</span><span class="text-base font-bold mt-1 block">${formatJPY(cashToPay)}</span></div>
+                <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm"><span class="text-[10px] font-semibold text-slate-400 block uppercase">Rec. Loan</span><span class="text-base font-bold ${loanAmount > 0 ? 'text-amber-600' : 'text-slate-400'} mt-1 block">${formatJPY(loanAmount)}</span></div>
+              </div>
+              <div class="bg-slate-100/50 dark:bg-slate-800/50 p-3 sm:p-4 rounded-xl mt-2">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2 block flex items-center"><i data-lucide="info" class="w-3.5 h-3.5 mr-1.5 text-blue-500"></i> Advisor Notes:</span>
+                <ul class="text-[11px] sm:text-xs space-y-2 text-slate-600 dark:text-slate-300">
+                  ${recommendations.map(r => `<li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 mr-2 flex-shrink-0 mt-0.5"></i><span class="leading-relaxed">${r}</span></li>`).join('')}
+                </ul>
+              </div>
+            </div>
+        `;
+        lucide.createIcons();
+    }
+    document.getElementById('calculateAffordabilityBtn').addEventListener('click', () => {
+        evaluateAffordability();
+        if(window.innerWidth < 1024) document.getElementById('affordabilityResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
-    // Dark Mode Initialization & Toggle
+    // Dark Mode
     const initializeTheme = () => {
-        // Check local storage or system preference
         const savedTheme = localStorage.getItem('wealthflow_theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-            document.documentElement.classList.add('dark');
-        }
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark'); }
         updateThemeIcon();
     };
-
     const updateThemeIcon = () => {
         const isDark = document.documentElement.classList.contains('dark');
         document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-        // Redraw charts to update text/grid colors for new theme
         if (portfolio.length > 0) renderCharts(portfolio[portfolio.length - 1]);
+        if (incomeLog.length > 0 && !document.getElementById('view-income').classList.contains('hidden')) renderIncomeChart();
         lucide.createIcons();
     };
-
     document.getElementById('themeToggle').addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
-      const isDark = document.documentElement.classList.contains('dark');
-      localStorage.setItem('wealthflow_theme', isDark ? 'dark' : 'light');
+      localStorage.setItem('wealthflow_theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
       updateThemeIcon();
     });
 
-    // Affordability Button Event
-    document.getElementById('calculateAffordabilityBtn').addEventListener('click', () => {
-        evaluateAffordability();
-        // Scroll slightly down to ensure result is visible on mobile
-        if(window.innerWidth < 1024) {
-            document.getElementById('affordabilityResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-    });
-
-    // Initialize UI
+    // Initialize
     initializeTheme();
     document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
+    const d = new Date(); document.getElementById('formIncDate').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    
     renderDashboard();
+    renderIncomeDashboard();
     evaluateAffordability();
     
-    // Handle window resize to re-render charts nicely
     let resizeTimer;
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => {
             renderCharts(portfolio[portfolio.length - 1]);
+            if(!document.getElementById('view-income').classList.contains('hidden')) renderIncomeChart();
         }, 250);
     });
   </script>
