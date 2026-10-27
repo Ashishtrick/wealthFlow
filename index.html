@@ -57,18 +57,19 @@
 
       <div class="flex items-center space-x-2 sm:space-x-3">
         <!-- Currency Toggle -->
-        <button id="currencyToggle" class="hidden sm:flex px-2 sm:px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition text-xs font-bold items-center">
+        <button id="currencyToggle" class="hidden sm:flex px-2 sm:px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition text-xs font-bold items-center" aria-label="Toggle Currency">
           <span id="currencyText">¥ JPY</span>
         </button>
-        <button id="currencyToggleMobile" class="sm:hidden p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center">
+        <!-- Mobile Currency Toggle Icon -->
+        <button id="currencyToggleMobile" class="sm:hidden p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center" aria-label="Toggle Currency">
           <i data-lucide="coins" class="w-4 h-4"></i>
         </button>
-        <!-- Wipe Data Button -->
-        <button id="wipeDataBtn" class="p-2 sm:p-2.5 rounded-lg bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900 transition flex items-center" title="Start Fresh / Reset Data">
+        <!-- Settings/Wipe Data Button -->
+        <button id="wipeDataBtn" class="p-2 sm:p-2.5 rounded-lg bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900 transition flex items-center" aria-label="Wipe Data">
           <i data-lucide="power" class="w-4 h-4"></i>
         </button>
         <!-- Theme Toggle -->
-        <button id="themeToggle" class="p-2 sm:p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+        <button id="themeToggle" class="p-2 sm:p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" aria-label="Toggle Dark Mode">
           <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
         </button>
       </div>
@@ -95,9 +96,9 @@
               <span>Net Wealth</span>
               <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="shield-check" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiNetWealth">¥0</div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiNetWealth">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center" id="kpiNetWealthGrowth">
-              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> Positive Trajectory
+              <i data-lucide="minus" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> No Data
             </div>
           </div>
 
@@ -106,16 +107,16 @@
               <span class="truncate pr-1">Total Assets</span>
               <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600 flex-shrink-0"><i data-lucide="pie-chart" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiTotalAssets">¥0</div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiTotalAssets">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate">Invested & Cash</div>
           </div>
 
-          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition" onclick="document.getElementById('debtAdvisorSection').scrollIntoView({behavior: 'smooth'})" title="View Debt Eradicator">
+          <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition" onclick="document.getElementById('debtAdvisorSection').scrollIntoView({behavior: 'smooth'})" title="Click to view Debt Eradicator">
             <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
               <span class="truncate pr-1">Liabilities</span>
               <span class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600 flex-shrink-0"><i data-lucide="arrow-down-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400" id="kpiPendingDebt">¥0</div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-rose-600 dark:text-rose-400" id="kpiPendingDebt">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500 truncate underline decoration-slate-300 dark:decoration-slate-700">View Debt Advisor</div>
           </div>
           
@@ -124,7 +125,7 @@
               <span>Liquid Cash</span>
               <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiEmergencyFund">¥0</div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiEmergencyFund">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500">Emergency & Savings</div>
           </div>
         </section>
@@ -135,7 +136,7 @@
             <span>Liquid Cash (Emergency)</span>
             <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-3.5 h-3.5"></i></span>
           </div>
-          <div class="mt-2 text-xl font-bold" id="kpiEmergencyFundMobile">¥0</div>
+          <div class="mt-2 text-xl font-bold" id="kpiEmergencyFundMobile">0</div>
         </section>
 
         <!-- Charts Section -->
@@ -173,7 +174,7 @@
             </div>
             <div>
               <h2 class="text-lg sm:text-xl font-bold leading-tight text-rose-600 dark:text-rose-400">Debt Eradicator Strategy</h2>
-              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Smart strategies to clear pending liabilities early and slash total interest paid.</p>
+              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Smart strategies to clear your pending liabilities faster and save on interest.</p>
             </div>
           </div>
           
@@ -184,7 +185,7 @@
               </div>
               
               <div class="w-full sm:w-64">
-                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Your Loan Interest Rate (%):</label>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">What is the interest rate on this loan?</label>
                   <div class="relative">
                       <input type="number" id="debtInterestRate" placeholder="3.5" inputmode="decimal" step="0.1"
                              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 appearance-none pr-8" value="3.5" />
@@ -198,7 +199,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 rounded-xl p-4 sm:p-5">
                   <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center"><i data-lucide="zap" class="w-4 h-4 mr-2 text-rose-500"></i>Strategy 1: 10% Prepayment</h3>
-                  <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">Allocate a small portion of your summer/winter bonus toward an immediate principal prepayment.</p>
+                  <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">Allocate a portion of your annual bonus to make a single lump-sum prepayment against the principal.</p>
                   <div class="mt-auto bg-white dark:bg-slate-800 rounded-lg p-3 border border-slate-100 dark:border-slate-700">
                       <div class="text-[11px] text-slate-500">Suggested Action:</div>
                       <div class="text-sm font-bold mt-1" id="debtStrategy1Amount">Pay ¥0 from Bonus</div>
@@ -207,12 +208,12 @@
               </div>
               
               <div class="bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 sm:p-5">
-                  <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center"><i data-lucide="trending-down" class="w-4 h-4 mr-2 text-blue-500"></i>Strategy 2: Monthly EMI Top-up</h3>
-                  <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">Increase regular monthly payments slightly to shorten amortization tenure.</p>
+                  <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-2 flex items-center"><i data-lucide="trending-down" class="w-4 h-4 mr-2 text-blue-500"></i>Strategy 2: Monthly Top-up</h3>
+                  <p class="text-xs text-slate-600 dark:text-slate-400 mb-3 leading-relaxed">Increase your monthly EMI slightly to aggressively reduce the loan tenure.</p>
                   <div class="mt-auto bg-white dark:bg-slate-800 rounded-lg p-3 border border-slate-100 dark:border-slate-700">
                       <div class="text-[11px] text-slate-500">Suggested Action:</div>
-                      <div class="text-sm font-bold mt-1">Add <span id="debtStrategy2Amount" class="text-blue-600">¥0</span> / month</div>
-                      <div class="text-xs text-emerald-600 mt-1" id="debtStrategy2Impact">Cuts tenure significantly</div>
+                      <div class="text-sm font-bold mt-1">Add <span id="debtStrategy2Amount" class="text-blue-600">¥0</span> to EMI/mo</div>
+                      <div class="text-xs text-emerald-600 mt-1" id="debtStrategy2Impact">Reduces tenure by ~X months</div>
                   </div>
               </div>
           </div>
@@ -226,7 +227,7 @@
             </div>
             <div>
               <h2 class="text-lg sm:text-xl font-bold leading-tight">Can I Afford It?</h2>
-              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluate target purchases based on actual liquidity and custom interest rates.</p>
+              <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1">Evaluate purchases based on your liquidity and localized interest rates.</p>
             </div>
           </div>
 
@@ -256,7 +257,7 @@
               </div>
               
               <div id="loanInterestContainer" class="hidden">
-                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Offered Loan Interest Rate (%)</label>
+                  <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Estimated Loan Interest Rate (%)</label>
                   <div class="relative">
                       <input type="number" id="targetItemRate" inputmode="decimal" step="0.1"
                              class="w-full px-3.5 py-2.5 sm:py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none pr-8" value="3.5" />
@@ -264,6 +265,7 @@
                           <span class="text-slate-400">%</span>
                       </div>
                   </div>
+                  <p class="text-[10px] text-slate-500 mt-1" id="rateHint">Typical rate applied based on currency.</p>
               </div>
 
               <button id="calculateAffordabilityBtn" class="w-full py-3.5 sm:py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2 mt-2">
@@ -288,6 +290,7 @@
               <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Record balances. Edit buckets if needed.</p>
             </div>
             <div class="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <!-- Edit Buckets Btn -->
               <button id="editBucketsBtn" class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 active:bg-slate-200 dark:active:bg-slate-700 text-xs font-semibold transition flex items-center justify-center space-x-1.5">
                 <i data-lucide="settings-2" class="w-4 h-4"></i>
                 <span>Customize Buckets</span>
@@ -313,24 +316,25 @@
             
             <div id="bucketInput1">
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5 truncate"><span class="bucket-label-1">Emergency Fund</span> (<span class="currency-label-short">¥</span>)</label>
-              <input type="number" id="formB1" inputmode="numeric" required placeholder="307002" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formB1" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             
             <div id="bucketInput2">
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5 truncate"><span class="bucket-label-2">NISA</span> (<span class="currency-label-short">¥</span>)</label>
-              <input type="number" id="formB2" inputmode="numeric" required placeholder="73355" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formB2" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             
             <div id="bucketInput3">
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5 truncate"><span class="bucket-label-3">ESOP</span> (<span class="currency-label-short">¥</span>)</label>
-              <input type="number" id="formB3" inputmode="numeric" required placeholder="78214" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formB3" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             
             <div id="bucketInput4">
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5 truncate"><span class="bucket-label-4">DC Pension</span> (<span class="currency-label-short">¥</span>)</label>
-              <input type="number" id="formB4" inputmode="numeric" required placeholder="60730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
+              <input type="number" id="formB4" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
             </div>
             
+            <!-- Optional 5th Bucket -->
             <div id="bucketInput5" class="hidden">
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5 truncate"><span class="bucket-label-5">Custom</span> (<span class="currency-label-short">¥</span>)</label>
               <input type="number" id="formB5" inputmode="numeric" placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none appearance-none" />
@@ -338,7 +342,7 @@
 
             <div>
               <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Pending Loan (<span class="currency-label-short">¥</span>)</label>
-              <input type="number" id="formLiability" inputmode="numeric" required placeholder="283730" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none appearance-none" />
+              <input type="number" id="formLiability" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-rose-500 focus:outline-none appearance-none" />
             </div>
             
             <div class="col-span-2 sm:col-span-3 lg:col-span-6 flex justify-end mt-2 lg:mt-0">
@@ -353,9 +357,11 @@
             <table class="w-full text-left text-xs border-collapse min-w-[800px]" id="portfolioTable">
               <thead>
                 <tr class="bg-slate-100/70 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700" id="portfolioTableHeadRow">
+                  <!-- Dynamically Generated -->
                 </tr>
               </thead>
               <tbody id="portfolioTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                <!-- Populated via JS -->
               </tbody>
             </table>
           </div>
@@ -371,7 +377,7 @@
               <span>Avg Monthly Net</span>
               <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600"><i data-lucide="banknote" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400" id="kpiAvgNet">¥0</div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400" id="kpiAvgNet">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500 flex items-center">
               Rolling 12 months
             </div>
@@ -381,7 +387,7 @@
             <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
               <span>Latest Net Pay</span>
             </div>
-            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiLatestNet">¥0</div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiLatestNet">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiLatestMonth">No Data</div>
           </div>
           
@@ -390,7 +396,7 @@
               <span>Latest Bonus</span>
               <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="gift" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-500" id="kpiLatestBonus">¥0</div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold text-amber-600 dark:text-amber-500" id="kpiLatestBonus">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiBonusMonth">No Data</div>
           </div>
           
@@ -399,7 +405,7 @@
               <span>Total YTD Income</span>
               <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiYtdTotal">¥0</div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold" id="kpiYtdTotal">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiYtdYear">Current Year</div>
           </div>
         </section>
@@ -409,7 +415,7 @@
             <span>Total YTD Income</span>
             <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i></span>
           </div>
-          <div class="mt-2 text-xl font-bold" id="kpiYtdTotalMobile">¥0</div>
+          <div class="mt-2 text-xl font-bold" id="kpiYtdTotalMobile">0</div>
         </section>
 
         <!-- Income Charts -->
@@ -460,7 +466,7 @@
                 </div>
                 <div class="col-span-2 sm:col-span-1">
                   <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Net Income (<span class="currency-label-short">¥</span>)</label>
-                  <input type="number" id="formIncNet" inputmode="numeric" required placeholder="270899" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
+                  <input type="number" id="formIncNet" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
                 </div>
                 <div class="col-span-2 sm:col-span-1 lg:col-span-2 flex justify-end mt-2 sm:mt-0 items-end">
                   <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-xs font-semibold active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
@@ -481,6 +487,7 @@
                   </tr>
                 </thead>
                 <tbody id="incomeTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  <!-- Populated via JS -->
                 </tbody>
               </table>
             </div>
@@ -490,6 +497,8 @@
   </main>
 
   <!-- Modals -->
+  
+  <!-- Customize Buckets Modal -->
   <div id="bucketsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
       <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full">
           <div class="flex items-center justify-between mb-4">
@@ -497,12 +506,12 @@
               <button id="closeBucketsBtn" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 mb-5 leading-relaxed">
-              Rename your investment buckets based on your region or personal style. You can also turn on an optional 5th bucket (e.g. Gold, Crypto, Direct Stocks).
+              Rename your investment buckets based on your region or strategy. You can also enable an optional 5th bucket (e.g. Gold, Crypto, Direct Equity).
           </p>
           
           <div class="space-y-4 mb-6">
               <div>
-                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">Bucket 1 (Liquid Cash)</label>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">Bucket 1 (Liquid)</label>
                   <input type="text" id="bucketName1" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" />
               </div>
               <div>
@@ -531,7 +540,7 @@
       </div>
   </div>
 
-  <!-- Wipe Modal -->
+  <!-- Wipe Data Modal -->
   <div id="wipeModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
       <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
           <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-950/50 flex items-center justify-center text-rose-600 mb-4 mx-auto">
@@ -539,7 +548,7 @@
           </div>
           <h3 class="text-xl font-bold text-center mb-2">Reset App Data</h3>
           <p class="text-sm text-slate-500 dark:text-slate-400 text-center mb-6">
-              This will wipe all records and reset the dashboard to a blank state. Are you sure?
+              This will wipe the pre-loaded starter data and any entries you saved. It resets the app to a blank state. Are you sure?
           </p>
           <div class="space-y-3">
               <button id="confirmWipeBtn" class="w-full py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm shadow-md transition active:scale-95">Yes, Start Fresh</button>
@@ -556,6 +565,7 @@
     window.addEventListener('resize', setMobileViewportHeight);
     setMobileViewportHeight();
 
+    // --- Tab Switching Logic ---
     function switchTab(tabName) {
         document.getElementById('view-portfolio').classList.toggle('hidden', tabName !== 'portfolio');
         document.getElementById('view-income').classList.toggle('hidden', tabName !== 'income');
@@ -567,11 +577,14 @@
         if(tabName === 'portfolio') renderDashboard();
     }
 
+    // --- Currency & Bucket Logic ---
     let currentCurrency = localStorage.getItem('wealthflow_currency') || 'JPY';
     
+    // Default bucket names based on region
     const defaultBucketsJPY = { b1: "Emergency Fund", b2: "NISA", b3: "ESOP", b4: "DC Pension", hasB5: false, b5: "Custom" };
     const defaultBucketsINR = { b1: "Liquid / FD", b2: "SIP / MF", b3: "ESOP", b4: "EPF / NPS", hasB5: false, b5: "Gold / SGB" };
     
+    // Load saved preferences or fallback to defaults
     let bucketPrefs = JSON.parse(localStorage.getItem('wealthflow_buckets')) || null;
     
     function getBuckets() {
@@ -582,13 +595,13 @@
     function getCurrencyConfig() {
         return currentCurrency === 'JPY' 
             ? { locale: 'ja-JP', curr: 'JPY', symbol: '¥', label: '¥ JPY', fallbackK: 'k', defaultRate: 3.5 }
-            : { locale: 'en-IN', curr: 'INR', symbol: '₹', label: '₹ INR', fallbackK: 'k', defaultRate: 10.5 };
+            : { locale: 'en-IN', curr: 'INR', symbol: '₹', label: '₹ INR', fallbackK: 'k', defaultRate: 10.5 }; // INR loans are typically 9-12%
     }
 
-    // FIXED: Uses conf.curr instead of string literal 'curr' to prevent RangeError crash
     function formatCurrency(val) {
         const conf = getCurrencyConfig();
-        return new Intl.NumberFormat(conf.locale, { style: 'currency', currency: conf.curr, maximumFractionDigits: 0 }).format(val);
+        return new Intl.NumberFormat(conf.locale, { style: 'currency', currency: 'curr', maximumFractionDigits: 0 })
+                   .format(val).replace(conf.curr, conf.symbol);
     }
     
     function formatCurrencyShort(val) {
@@ -602,14 +615,18 @@
     
     function applyBucketLabels() {
         const b = getBuckets();
+        
+        // Update Form Labels
         document.querySelector('.bucket-label-1').textContent = b.b1;
         document.querySelector('.bucket-label-2').textContent = b.b2;
         document.querySelector('.bucket-label-3').textContent = b.b3;
         document.querySelector('.bucket-label-4').textContent = b.b4;
         document.querySelector('.bucket-label-5').textContent = b.b5;
         
+        // Toggle 5th bucket visibility in form
         document.getElementById('bucketInput5').classList.toggle('hidden', !b.hasB5);
         
+        // Build Table Header
         const thead = document.getElementById('portfolioTableHeadRow');
         thead.innerHTML = `
             <th class="p-3.5 whitespace-nowrap">Date</th>
@@ -631,6 +648,7 @@
         document.querySelectorAll('.currency-label').forEach(el => el.textContent = conf.label);
         document.querySelectorAll('.currency-label-short').forEach(el => el.textContent = conf.symbol);
         
+        // Switch default interest rate hint
         const rateInput = document.getElementById('targetItemRate');
         if(!rateInput.dataset.modified) {
             rateInput.value = conf.defaultRate;
@@ -651,8 +669,10 @@
 
     document.getElementById('currencyToggle').addEventListener('click', toggleCurrency);
     document.getElementById('currencyToggleMobile').addEventListener('click', toggleCurrency);
+    
     document.getElementById('targetItemRate').addEventListener('input', function() { this.dataset.modified = "true"; });
 
+    // --- Bucket Customization Modal ---
     document.getElementById('editBucketsBtn').addEventListener('click', () => {
         const b = getBuckets();
         document.getElementById('bucketName1').value = b.b1;
@@ -673,6 +693,7 @@
     
     document.getElementById('saveBucketsBtn').addEventListener('click', () => {
         if (!bucketPrefs) bucketPrefs = { JPY: {...defaultBucketsJPY}, INR: {...defaultBucketsINR} };
+        
         bucketPrefs[currentCurrency] = {
             b1: document.getElementById('bucketName1').value || "Bucket 1",
             b2: document.getElementById('bucketName2').value || "Bucket 2",
@@ -681,13 +702,15 @@
             hasB5: document.getElementById('enableBucket5').checked,
             b5: document.getElementById('bucketName5').value || "Bucket 5"
         };
+        
         localStorage.setItem('wealthflow_buckets', JSON.stringify(bucketPrefs));
         document.getElementById('bucketsModal').classList.add('hidden');
         applyBucketLabels();
         renderDashboard();
     });
 
-    // --- Core Master Initial Data (Exact Figures from your Savings Sheets) ---
+    // --- Data Store ---
+    // Added b5 to schema. Older data will map undefined b5 to 0.
     const initialPortfolioData = [
       { date: '2026-05-31', b1: 154956, b2: 21626, b3: 10876.2, b4: 20190, b5: 0, liability: 594082 },
       { date: '2026-06-30', b1: 254956, b2: 31834, b3: 22004.8, b4: 23601, b5: 0, liability: 594082 },
@@ -713,27 +736,8 @@
       { month: '2026-10', type: 'salary', net: 270899 }
     ];
 
-    // Load data with backward compatibility to prevent empty arrays
-    function loadSavedPortfolio() {
-        const saved = localStorage.getItem('wealthflow_portfolio_v5');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-        return [...initialPortfolioData];
-    }
-
-    function loadSavedIncome() {
-        const saved = localStorage.getItem('wealthflow_income_v5');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-        return [...initialIncomeData];
-    }
-
-    let portfolio = loadSavedPortfolio();
-    let incomeLog = loadSavedIncome();
+    let portfolio = localStorage.getItem('wealthflow_portfolio_v4') ? JSON.parse(localStorage.getItem('wealthflow_portfolio_v4')) : initialPortfolioData;
+    let incomeLog = localStorage.getItem('wealthflow_income_v4') ? JSON.parse(localStorage.getItem('wealthflow_income_v4')) : initialIncomeData;
 
     // Wipe Modal Handlers
     document.getElementById('wipeDataBtn').addEventListener('click', () => { document.getElementById('wipeModal').classList.remove('hidden'); });
@@ -741,13 +745,15 @@
     document.getElementById('confirmWipeBtn').addEventListener('click', () => {
         portfolio = [];
         incomeLog = [];
-        localStorage.setItem('wealthflow_portfolio_v5', JSON.stringify(portfolio));
-        localStorage.setItem('wealthflow_income_v5', JSON.stringify(incomeLog));
+        localStorage.setItem('wealthflow_portfolio_v4', JSON.stringify(portfolio));
+        localStorage.setItem('wealthflow_income_v4', JSON.stringify(incomeLog));
+        
         document.getElementById('wipeModal').classList.add('hidden');
         renderDashboard();
         renderIncomeDashboard();
         document.getElementById('affordabilityResult').innerHTML = '<div class="text-slate-500 text-sm text-center py-10">Add portfolio data first to use the calculator.</div>';
     });
+
 
     let growthChartInstance = null;
     let allocationChartInstance = null;
@@ -755,15 +761,10 @@
     let yoyChartInstance = null;
 
     function calculateMetrics(entry) {
-      const b1 = Number(entry.b1 ?? entry.emergency ?? 0);
-      const b2 = Number(entry.b2 ?? entry.nisa ?? 0);
-      const b3 = Number(entry.b3 ?? entry.esop ?? 0);
-      const b4 = Number(entry.b4 ?? entry.dc ?? 0);
-      const b5 = Number(entry.b5 ?? 0);
-      const liability = Number(entry.liability ?? 0);
-      const totalAssets = b1 + b2 + b3 + b4 + b5;
-      const netWealth = totalAssets - liability;
-      return { totalAssets, netWealth, b1, b2, b3, b4, b5, liability };
+      const b5 = entry.b5 || 0;
+      const totalAssets = entry.b1 + entry.b2 + entry.b3 + entry.b4 + b5;
+      const netWealth = totalAssets - entry.liability;
+      return { totalAssets, netWealth, b5 };
     }
 
     function renderDashboard() {
@@ -786,12 +787,13 @@
           document.getElementById('allocationChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
           document.getElementById('allocationLegend').innerHTML = '';
           tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-500">No portfolio data found. Add your first entry below.</td></tr>`;
+          
           document.getElementById('debtAdvisorSection').classList.add('hidden');
           return;
       }
 
       portfolio.sort((a, b) => new Date(a.date) - new Date(b.date));
-      localStorage.setItem('wealthflow_portfolio_v5', JSON.stringify(portfolio));
+      localStorage.setItem('wealthflow_portfolio_v4', JSON.stringify(portfolio));
 
       const latest = portfolio[portfolio.length - 1];
       const prev = portfolio.length > 1 ? portfolio[portfolio.length - 2] : latest;
@@ -800,25 +802,26 @@
 
       document.getElementById('kpiNetWealth').textContent = formatCurrencyShort(latestMetrics.netWealth);
       document.getElementById('kpiTotalAssets').textContent = formatCurrencyShort(latestMetrics.totalAssets);
-      document.getElementById('kpiPendingDebt').textContent = formatCurrencyShort(latestMetrics.liability);
-      document.getElementById('kpiEmergencyFund').textContent = formatCurrencyShort(latestMetrics.b1);
+      document.getElementById('kpiPendingDebt').textContent = formatCurrencyShort(latest.liability);
+      document.getElementById('kpiEmergencyFund').textContent = formatCurrencyShort(latest.b1);
       const mobElem = document.getElementById('kpiEmergencyFundMobile');
-      if(mobElem) mobElem.textContent = formatCurrencyShort(latestMetrics.b1);
+      if(mobElem) mobElem.textContent = formatCurrencyShort(latest.b1);
 
       const netWealthDiff = latestMetrics.netWealth - prevMetrics.netWealth;
       const growthEl = document.getElementById('kpiNetWealthGrowth');
       if (netWealthDiff >= 0) {
         growthEl.className = "mt-1 text-[10px] sm:text-xs text-emerald-600 dark:text-emerald-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> +${formatCurrencyShort(netWealthDiff)} since last record`;
+        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> +${formatCurrencyShort(netWealthDiff)} since last record`;
       } else {
         growthEl.className = "mt-1 text-[10px] sm:text-xs text-rose-600 dark:text-rose-400 flex items-center";
-        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3.5 h-3.5 mr-0.5"></i> ${formatCurrencyShort(netWealthDiff)} since last record`;
+        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-0.5"></i> ${formatCurrencyShort(netWealthDiff)} since last record`;
       }
       
-      if(latestMetrics.liability > 0) {
+      // Update Debt Advisor
+      if(latest.liability > 0) {
           document.getElementById('debtAdvisorSection').classList.remove('hidden');
-          document.getElementById('debtAdvisorAmount').textContent = formatCurrency(latestMetrics.liability);
-          updateDebtAdvisor(latestMetrics.liability);
+          document.getElementById('debtAdvisorAmount').textContent = formatCurrency(latest.liability);
+          updateDebtAdvisor(latest.liability);
       } else {
           document.getElementById('debtAdvisorSection').classList.add('hidden');
       }
@@ -830,13 +833,13 @@
         tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition cursor-default";
         tr.innerHTML = `
           <td class="p-3.5 font-semibold whitespace-nowrap">${row.date}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b1)}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b2)}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b3)}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(m.b4)}</td>
-          ${b.hasB5 ? `<td class="p-3.5 whitespace-nowrap text-emerald-600 dark:text-emerald-400">${formatCurrency(m.b5)}</td>` : ''}
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b1)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b2)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b3)}</td>
+          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b4)}</td>
+          ${b.hasB5 ? `<td class="p-3.5 whitespace-nowrap text-emerald-600 dark:text-emerald-400">${formatCurrency(row.b5 || 0)}</td>` : ''}
           <td class="p-3.5 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap bg-slate-50 dark:bg-slate-800/50">${formatCurrency(m.totalAssets)}</td>
-          <td class="p-3.5 font-medium text-rose-500 whitespace-nowrap">${formatCurrency(m.liability)}</td>
+          <td class="p-3.5 font-medium text-rose-500 whitespace-nowrap">${formatCurrency(row.liability)}</td>
           <td class="p-3.5 font-bold ${m.netWealth >= 0 ? 'text-emerald-600' : 'text-amber-500'} whitespace-nowrap">${formatCurrency(m.netWealth)}</td>
           <td class="p-3.5 text-center">
             <button onclick="deleteEntry(${actualIdx})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition active:scale-95"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -849,22 +852,30 @@
       lucide.createIcons();
     }
     
+    // Debt Advisor Calculation
     function updateDebtAdvisor(liability) {
         const rate = parseFloat(document.getElementById('debtInterestRate').value) || (currentCurrency === 'JPY' ? 3.5 : 10.5);
+        const monthlyRate = (rate / 100) / 12;
+        
+        // Strategy 1: Lump sum 10% prepayment from bonus
         const lumpSum = liability * 0.10;
-        const approxInterestSaved = lumpSum * (rate / 100) * 4.5;
+        // Approximation of interest saved over 5 years
+        const approxInterestSaved = lumpSum * rate/100 * 5; 
         
         document.getElementById('debtStrategy1Amount').textContent = `Pay ${formatCurrencyShort(lumpSum)} from Bonus`;
-        document.getElementById('debtStrategy1Savings').textContent = `Saves ~${formatCurrencyShort(approxInterestSaved)} in total interest`;
+        document.getElementById('debtStrategy1Savings').textContent = `Saves ~${formatCurrencyShort(approxInterestSaved)} in interest`;
         
-        const topUp = liability * 0.01;
+        // Strategy 2: Monthly top up
+        const topUp = liability * 0.01; // adding 1% of loan value to EMI
         document.getElementById('debtStrategy2Amount').textContent = formatCurrencyShort(topUp);
+        
+        // Rough estimate impact
         const monthsReduced = currentCurrency === 'INR' ? "18-24" : "12-16";
-        document.getElementById('debtStrategy2Impact').textContent = `Shortens tenure by ~${monthsReduced} months`;
+        document.getElementById('debtStrategy2Impact').textContent = `Reduces tenure by ~${monthsReduced} months`;
     }
     
     document.getElementById('debtInterestRate').addEventListener('input', () => {
-        if(portfolio.length > 0) updateDebtAdvisor(calculateMetrics(portfolio[portfolio.length-1]).liability);
+        if(portfolio.length > 0) updateDebtAdvisor(portfolio[portfolio.length-1].liability);
     });
 
     function renderCharts(latest) {
@@ -876,10 +887,10 @@
       const dates = portfolio.map(e => isMobile ? e.date.substring(5) : e.date);
       const netWealths = portfolio.map(e => calculateMetrics(e).netWealth);
       const totalAssets = portfolio.map(e => calculateMetrics(e).totalAssets);
-      const liabilities = portfolio.map(e => calculateMetrics(e).liability);
+      const liabilities = portfolio.map(e => e.liability);
       
+      const conf = getCurrencyConfig();
       const b = getBuckets();
-      const lm = calculateMetrics(latest);
 
       Chart.defaults.font.size = isMobile ? 10 : 12;
       Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
@@ -922,7 +933,7 @@
       const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
       if (allocationChartInstance) allocationChartInstance.destroy();
       
-      const allocData = b.hasB5 ? [lm.b1, lm.b2, lm.b3, lm.b4, lm.b5] : [lm.b1, lm.b2, lm.b3, lm.b4];
+      const allocData = b.hasB5 ? [latest.b1, latest.b2, latest.b3, latest.b4, latest.b5 || 0] : [latest.b1, latest.b2, latest.b3, latest.b4];
       const allocLabels = b.hasB5 ? [b.b1, b.b2, b.b3, b.b4, b.b5] : [b.b1, b.b2, b.b3, b.b4];
       const allocColors = b.hasB5 ? ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'] : ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
       
@@ -935,7 +946,7 @@
           });
           document.getElementById('allocationLegend').innerHTML = allocLabels.map((lbl, idx) => `<div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span><div class="flex flex-col"><span class="text-slate-500 font-medium truncate max-w-[80px]" title="${lbl}">${lbl}</span><span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span></div></div>`).join('');
       } else {
-          document.getElementById('allocationChartContainer').innerHTML = '<div class="text-slate-400 text-sm">Assets are 0</div>';
+          document.getElementById('allocationChartContainer').innerHTML = '<div class="text-slate-400 text-sm">Assets are ' + conf.symbol + '0</div>';
       }
     }
 
@@ -958,16 +969,18 @@
           if(yoyChartInstance) yoyChartInstance.destroy();
           document.getElementById('incomeChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
           document.getElementById('yoyChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
+          
           tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No income data found. Log your first salary below.</td></tr>`;
           return;
       }
 
       incomeLog.sort((a, b) => new Date(a.month) - new Date(b.month));
-      localStorage.setItem('wealthflow_income_v5', JSON.stringify(incomeLog));
+      localStorage.setItem('wealthflow_income_v4', JSON.stringify(incomeLog));
 
       const salaries = incomeLog.filter(i => i.type === 'salary');
       const bonuses = incomeLog.filter(i => i.type === 'bonus');
 
+      // Avg & Latest KPIs
       if (salaries.length > 0) {
         const last12 = salaries.slice(-12);
         const avgNet = last12.reduce((acc, curr) => acc + curr.net, 0) / last12.length;
@@ -988,12 +1001,14 @@
         document.getElementById('kpiBonusMonth').textContent = 'No Data';
       }
       
+      // YTD Calculation (Current Year)
       const currentYear = new Date().getFullYear().toString();
       const ytdIncome = incomeLog.filter(i => i.month.startsWith(currentYear)).reduce((sum, item) => sum + item.net, 0);
       document.getElementById('kpiYtdTotal').textContent = formatCurrencyShort(ytdIncome);
       document.getElementById('kpiYtdYear').textContent = currentYear + " YTD";
       if(document.getElementById('kpiYtdTotalMobile')) document.getElementById('kpiYtdTotalMobile').textContent = formatCurrencyShort(ytdIncome);
 
+      // Populate Table
       incomeLog.slice().reverse().forEach((row, revIdx) => {
         const actualIdx = incomeLog.length - 1 - revIdx;
         const tr = document.createElement('tr');
@@ -1022,6 +1037,7 @@
     function renderIncomeChart() {
       if(incomeLog.length === 0) return;
       document.getElementById('incomeChartContainer').innerHTML = '<canvas id="incomeChart"></canvas>';
+      
       const isMobile = window.innerWidth < 768;
       
       const monthlyData = {};
@@ -1033,6 +1049,7 @@
 
       const labels = Object.keys(monthlyData).sort();
       const recentLabels = labels.slice(-12);
+      
       const displayLabels = recentLabels.map(l => isMobile ? l.substring(5) : l);
       const salaryData = recentLabels.map(l => monthlyData[l].salary);
       const bonusData = recentLabels.map(l => monthlyData[l].bonus);
@@ -1166,7 +1183,7 @@
       }
     };
     
-    // Form Submission: Reads correctly from formB1, formB2, formB3, formB4, formB5
+    // --- Portfolio Submission ---
     document.getElementById('newEntryForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -1178,10 +1195,10 @@
           const b = getBuckets();
           const newEntry = {
             date: document.getElementById('formDate').value,
-            b1: parseFloat(document.getElementById('formB1').value) || 0,
-            b2: parseFloat(document.getElementById('formB2').value) || 0,
-            b3: parseFloat(document.getElementById('formB3').value) || 0,
-            b4: parseFloat(document.getElementById('formB4').value) || 0,
+            b1: parseFloat(document.getElementById('formEmergency').value) || 0,
+            b2: parseFloat(document.getElementById('formNisa').value) || 0,
+            b3: parseFloat(document.getElementById('formEsop').value) || 0,
+            b4: parseFloat(document.getElementById('formDc').value) || 0,
             liability: parseFloat(document.getElementById('formLiability').value) || 0
           };
           
@@ -1213,6 +1230,7 @@
       }
     };
 
+    // Affordability
     document.getElementById('targetItemCategory').addEventListener('change', (e) => {
         const rateContainer = document.getElementById('loanInterestContainer');
         if(e.target.value === 'vehicle' || e.target.value === 'property') {
@@ -1235,7 +1253,10 @@
         
         const latest = portfolio[portfolio.length - 1];
         const lm = calculateMetrics(latest);
-        const currentCash = lm.b1;
+        
+        // Use latest saved cash or check if anything entered
+        const formCashVal = parseFloat(document.getElementById('formB1')?.value);
+        const currentCash = (!isNaN(formCashVal) && formCashVal > 0) ? formCashVal : lm.b1;
         
         const salaries = incomeLog.filter(i => i.type === 'salary').slice(-6);
         const monthlyNetSalary = salaries.length > 0 ? (salaries.reduce((acc, curr) => acc + curr.net, 0) / salaries.length) : (currentCurrency === 'INR' ? 150000 : 270000);
@@ -1243,84 +1264,189 @@
         const baselineEmergencyBuffer = currentCurrency === 'INR' ? 100000 : 200000;
         const usableLiquidCash = Math.max(0, currentCash - baselineEmergencyBuffer);
 
-        let canAfford = false; let cashToPay = 0; let loanAmount = 0; let verdictTitle = ""; let verdictColor = ""; let rationale = ""; let recommendations = [];
+        let isLoan = false;
+        let cashToPay = 0;
+        let loanAmount = 0;
+        let emi = 0;
+        let tenureMonths = 0;
+        let verdictTitle = "";
+        let verdictColor = "";
+        let rationale = "";
+        let recommendations = [];
 
         switch (category) {
             case 'gadget': 
+                isLoan = false;
+                cashToPay = cost;
+                loanAmount = 0;
+                emi = 0;
                 if (cost <= usableLiquidCash) {
-                    cashToPay = cost; verdictTitle = "Affordable (100% Cash)"; verdictColor = "text-emerald-600 dark:text-emerald-400";
-                    rationale = `You can buy <strong>${name}</strong> outright without breaching your ${formatCurrency(baselineEmergencyBuffer)} emergency buffer.`;
-                    recommendations.push("Pay 100% in cash. Avoid consumer EMI.");
+                    verdictTitle = "Affordable (100% Cash)";
+                    verdictColor = "text-emerald-600 dark:text-emerald-400";
+                    rationale = `You can buy <strong>${name}</strong> outright in cash without touching your ${formatCurrency(baselineEmergencyBuffer)} emergency reserve.`;
+                    recommendations.push("Pay 100% in cash. Never use high-interest consumer credit or EMI schemes for electronics.");
+                    recommendations.push(`Remaining liquid savings after purchase: <strong>${formatCurrency(currentCash - cost)}</strong>.`);
                 } else {
-                    const shortfall = cost - usableLiquidCash; const monthsToSave = Math.ceil(shortfall / (monthlyNetSalary * 0.15)); 
-                    verdictTitle = "Not Recommended Right Now"; verdictColor = "text-rose-600 dark:text-rose-400";
-                    rationale = `Buying ${name} in cash right now dips into your essential buffer.`;
-                    recommendations.push(`Save approx ${formatCurrency(monthlyNetSalary*0.15)}/mo for <strong>${monthsToSave} more month(s)</strong> first.`);
+                    const shortfall = cost - usableLiquidCash;
+                    const monthsToSave = Math.ceil(shortfall / (monthlyNetSalary * 0.15));
+                    verdictTitle = "Save Cash Before Purchasing";
+                    verdictColor = "text-amber-500";
+                    rationale = `Buying ${name} in cash right now would dip into your safety buffer by ${formatCurrency(shortfall)}.`;
+                    recommendations.push("<strong>Avoid consumer loans & no-cost EMIs</strong> (they encourage lifestyle inflation and damage net wealth).");
+                    recommendations.push(`Save approx ${formatCurrency(monthlyNetSalary * 0.15)}/mo for <strong>${monthsToSave} month(s)</strong> to buy comfortably in cash.`);
                 }
                 break;
+
             case 'vehicle': 
-                const vehicleDownPayment = Math.min(cost * 0.4, usableLiquidCash); const vehicleLoan = cost - vehicleDownPayment;
+                isLoan = true;
+                const down20 = Math.round(cost * 0.20); // 20% standard down payment
+                const down10 = Math.round(cost * 0.10); // 10% minimum
+                cashToPay = down20;
+                loanAmount = Math.round(cost - cashToPay);
+                tenureMonths = 48; // 4 years standard
                 const monthlyRateV = (rate / 100) / 12;
-                const estimatedBikeEmi = vehicleLoan > 0 ? (vehicleLoan * monthlyRateV * Math.pow(1 + monthlyRateV, 48)) / (Math.pow(1 + monthlyRateV, 48) - 1) : 0;
-                
-                if (usableLiquidCash >= cost * 0.3 && estimatedBikeEmi <= (monthlyNetSalary * 0.15)) {
-                    cashToPay = Math.round(vehicleDownPayment); loanAmount = Math.round(vehicleLoan);
-                    verdictTitle = "Affordable with Auto Loan"; verdictColor = "text-emerald-600 dark:text-emerald-400";
-                    rationale = `You can finance <strong>${name}</strong> safely at ${rate}%.`;
-                    recommendations.push(`Down Payment: <strong>${formatCurrency(cashToPay)}</strong>.`);
-                    recommendations.push(`Auto Loan: <strong>${formatCurrency(loanAmount)}</strong> (Est EMI: ~${formatCurrency(estimatedBikeEmi)}/mo for 48mo).`);
+                emi = (loanAmount * monthlyRateV * Math.pow(1 + monthlyRateV, tenureMonths)) / (Math.pow(1 + monthlyRateV, tenureMonths) - 1);
+                const emiSalaryPct = (emi / monthlyNetSalary) * 100;
+
+                const emi10 = ((cost - down10) * monthlyRateV * Math.pow(1 + monthlyRateV, tenureMonths)) / (Math.pow(1 + monthlyRateV, tenureMonths) - 1);
+                const emi10Pct = (emi10 / monthlyNetSalary) * 100;
+
+                if (usableLiquidCash >= down20 && emiSalaryPct <= 15) {
+                    verdictTitle = "Affordable with Auto Loan";
+                    verdictColor = "text-emerald-600 dark:text-emerald-400";
+                    rationale = `Your income comfortably supports the monthly EMI, and you have enough cash above emergency reserves to cover the 20% down payment.`;
+                    recommendations.push(`Down Payment: <strong>${formatCurrency(cashToPay)}</strong> (20%) paid upfront from liquid savings.`);
+                    recommendations.push(`Auto Loan: <strong>${formatCurrency(loanAmount)}</strong> at ${rate}% for ${tenureMonths} months.`);
+                    recommendations.push(`Monthly EMI: <strong>${formatCurrency(Math.round(emi))}/mo</strong> (takes only ${emiSalaryPct.toFixed(1)}% of your ~${formatCurrency(monthlyNetSalary)} net salary, well below the 15% safety limit).`);
+                } else if (emiSalaryPct <= 15) {
+                    const shortfall20 = down20 - usableLiquidCash;
+                    const monthsToSave = Math.max(1, Math.ceil(shortfall20 / (monthlyNetSalary * 0.15)));
+                    verdictTitle = "Feasible EMI — Minor Cash Shortfall";
+                    verdictColor = "text-amber-500";
+                    rationale = `The monthly EMI of <strong>${formatCurrency(Math.round(emi))}/mo</strong> is very comfortable (takes only ${emiSalaryPct.toFixed(1)}% of your ~${formatCurrency(monthlyNetSalary)} net salary). However, your available cash above emergency reserves is ${formatCurrency(usableLiquidCash)}, leaving a ${formatCurrency(shortfall20)} shortfall for the recommended 20% down payment.`;
+                    recommendations.push(`<strong>Plan A (Recommended):</strong> Save approx ${formatCurrency(shortfall20)} (~${monthsToSave} month(s)) to put 20% down (${formatCurrency(down20)}) and keep your emergency fund 100% intact.`);
+                    if (usableLiquidCash >= down10) {
+                        recommendations.push(`<strong>Plan B (Immediate):</strong> Put a 10% down payment (${formatCurrency(down10)}) today with ${formatCurrency(usableLiquidCash - down10)} to spare! The loan is ${formatCurrency(cost - down10)} with an EMI of ~<strong>${formatCurrency(Math.round(emi10))}/mo</strong> (${emi10Pct.toFixed(1)}% of salary).`);
+                    } else {
+                        recommendations.push(`Avoid zero-down dealership loans; wait until you have at least 10–20% down payment ready in cash.`);
+                    }
                 } else {
-                    verdictTitle = "Wait & Save Larger Down"; verdictColor = "text-amber-500";
-                    rationale = `Liquid cash is below recommended 40% down payment buffer.`;
-                    recommendations.push(`Save an additional <strong>${formatCurrency(Math.max(0, (cost * 0.4) - usableLiquidCash))}</strong> in cash.`);
+                    verdictTitle = "Exceeds Safe Debt Limit";
+                    verdictColor = "text-rose-600 dark:text-rose-400";
+                    rationale = `The monthly EMI of <strong>${formatCurrency(Math.round(emi))}/mo</strong> would consume ${emiSalaryPct.toFixed(1)}% of your monthly net income (maximum safe limit is 15%).`;
+                    recommendations.push("This vehicle poses too high a burden on your monthly cash flow.");
+                    recommendations.push("Consider choosing a lower-priced vehicle or saving a much larger down payment (>40%) to reduce the loan.");
                 }
                 break;
+
             case 'event': 
+                isLoan = false;
+                cashToPay = cost;
+                loanAmount = 0;
+                emi = 0;
                 if (usableLiquidCash >= cost) {
-                    cashToPay = cost; verdictTitle = "Affordable in Cash"; verdictColor = "text-emerald-600";
-                    rationale = `Your savings fully cover <strong>${name}</strong>.`;
-                    recommendations.push("Pay 100% from savings. Never take personal loans for events.");
+                    verdictTitle = "Affordable in Cash";
+                    verdictColor = "text-emerald-600 dark:text-emerald-400";
+                    rationale = `Your liquid savings fully cover <strong>${name}</strong> without borrowing.`;
+                    recommendations.push("Pay 100% from savings. Avoid personal loans for life events or travel.");
                 } else {
-                    verdictTitle = "Requires Savings Plan"; verdictColor = "text-rose-500";
-                    rationale = `Personal loans carry toxic interest rates.`;
-                    recommendations.push(`<strong>Cash Shortfall:</strong> ${formatCurrency(cost - usableLiquidCash)}.`);
+                    const shortfall = cost - usableLiquidCash;
+                    const monthsNeeded = Math.ceil(shortfall / (monthlyNetSalary * 0.20));
+                    verdictTitle = "Requires Target Savings Plan";
+                    verdictColor = "text-rose-500";
+                    rationale = `Personal loans for lifestyle events carry high 10%–15% interest. You have a cash gap of ${formatCurrency(shortfall)}.`;
+                    recommendations.push(`<strong>Cash Shortfall:</strong> ${formatCurrency(shortfall)} to avoid touching emergency reserves.`);
+                    recommendations.push(`Reallocate approx ${formatCurrency(monthlyNetSalary * 0.20)}/mo into cash for <strong>${monthsNeeded} months</strong> before booking.`);
                 }
                 break;
+
             case 'property': 
-                const reqDown = cost * 0.20; const mortAmount = cost * 0.80;
+                isLoan = true;
+                const downProp = Math.round(cost * 0.20); // 20% down
+                cashToPay = downProp;
+                loanAmount = Math.round(cost - cashToPay);
+                tenureMonths = currentCurrency === 'INR' ? 240 : 360; // 20 yrs India, 30 yrs Japan
                 const monthlyRateH = (rate / 100) / 12;
-                const tenureMonths = currentCurrency === 'INR' ? 240 : 360;
-                const estMortgageEmi = mortAmount > 0 ? (mortAmount * monthlyRateH * Math.pow(1 + monthlyRateH, tenureMonths)) / (Math.pow(1 + monthlyRateH, tenureMonths) - 1) : 0;
-                
-                if (usableLiquidCash >= reqDown && estMortgageEmi <= (monthlyNetSalary * 0.35)) {
-                    cashToPay = Math.round(reqDown); loanAmount = Math.round(mortAmount);
-                    verdictTitle = "Feasible Home Purchase"; verdictColor = "text-emerald-600";
-                    rationale = `Meets 20% down payment test & mortgage is within limits at ${rate}%.`;
-                    recommendations.push(`Down Payment: <strong>${formatCurrency(cashToPay)}</strong>.`);
-                    recommendations.push(`Mortgage: <strong>${formatCurrency(loanAmount)}</strong> (Est ~${formatCurrency(estMortgageEmi)}/mo).`);
+                emi = (loanAmount * monthlyRateH * Math.pow(1 + monthlyRateH, tenureMonths)) / (Math.pow(1 + monthlyRateH, tenureMonths) - 1);
+                const emiPropPct = (emi / monthlyNetSalary) * 100;
+
+                if (usableLiquidCash >= downProp && emiPropPct <= 35) {
+                    verdictTitle = "Feasible Home Purchase";
+                    verdictColor = "text-emerald-600 dark:text-emerald-400";
+                    rationale = `Meets the 20% down payment buffer and mortgage is within safe limits (${emiPropPct.toFixed(1)}% of salary) at ${rate}%.`;
+                    recommendations.push(`Cash Down Payment: <strong>${formatCurrency(cashToPay)}</strong> (20%).`);
+                    recommendations.push(`Housing Mortgage: <strong>${formatCurrency(loanAmount)}</strong> (80%) for ${tenureMonths/12} years.`);
+                    recommendations.push(`Est. Mortgage EMI: ~<strong>${formatCurrency(Math.round(emi))}/mo</strong>.`);
+                } else if (emiPropPct <= 35) {
+                    const shortfall = downProp - usableLiquidCash;
+                    verdictTitle = "Accumulate Down Payment Buffer";
+                    verdictColor = "text-amber-500";
+                    rationale = `The mortgage EMI of ${formatCurrency(Math.round(emi))}/mo (${emiPropPct.toFixed(1)}% of income) is affordable, but you need ${formatCurrency(shortfall)} more in liquid cash to meet the recommended 20% down payment cushion.`;
+                    recommendations.push(`<strong>Down Payment Shortfall:</strong> ${formatCurrency(shortfall)}.`);
+                    recommendations.push("Continue compounding investments until you reach the cash down payment threshold.");
                 } else {
-                    verdictTitle = "Accumulate Seed Down Payment"; verdictColor = "text-amber-500";
-                    rationale = `Property requires at least 20% down payment (${formatCurrency(reqDown)}).`;
-                    recommendations.push(`<strong>Shortfall:</strong> ${formatCurrency(Math.max(0, reqDown - usableLiquidCash))}.`);
+                    verdictTitle = "Mortgage Exceeds Safe Capacity";
+                    verdictColor = "text-rose-600 dark:text-rose-400";
+                    rationale = `Estimated mortgage payment of ${formatCurrency(Math.round(emi))}/mo consumes ${emiPropPct.toFixed(1)}% of your net pay (max safe threshold is 35%).`;
+                    recommendations.push("Consider looking in a lower price bracket or saving a much larger down payment (>40%).");
                 }
                 break;
         }
 
+        const cardsHtml = isLoan ? `
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 py-2">
+            <div class="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wide">Down Payment</span>
+              <span class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 mt-0.5 block">${formatCurrency(cashToPay)}</span>
+              <span class="text-[9px] text-slate-400">20% Cash</span>
+            </div>
+            <div class="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wide">Loan Principal</span>
+              <span class="text-sm sm:text-base font-bold text-amber-600 dark:text-amber-400 mt-0.5 block">${formatCurrency(loanAmount)}</span>
+              <span class="text-[9px] text-slate-400">80% Financed</span>
+            </div>
+            <div class="p-2.5 sm:p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wide">Monthly EMI</span>
+              <span class="text-sm sm:text-base font-bold text-blue-600 dark:text-blue-400 mt-0.5 block">${formatCurrency(Math.round(emi))}</span>
+              <span class="text-[9px] text-slate-400">${tenureMonths} mos @ ${rate}%</span>
+            </div>
+          </div>
+        ` : `
+          <div class="grid grid-cols-2 gap-3 py-2">
+            <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wide">Full Cash Outlay</span>
+              <span class="text-base sm:text-lg font-bold text-slate-800 dark:text-slate-100 mt-0.5 block">${formatCurrency(cashToPay)}</span>
+              <span class="text-[10px] text-slate-400">100% Upfront</span>
+            </div>
+            <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-center">
+              <span class="text-[10px] font-semibold text-slate-400 block uppercase tracking-wide">Loan Amount</span>
+              <span class="text-base sm:text-lg font-bold text-slate-400 mt-0.5 block">${formatCurrency(0)}</span>
+              <span class="text-[10px] text-emerald-500 font-medium">Debt Discouraged</span>
+            </div>
+          </div>
+        `;
+
         document.getElementById('affordabilityResult').innerHTML = `
             <div class="space-y-4">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700/50 gap-2">
-                <div><span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Verdict</span>
-                <h3 class="text-base sm:text-lg font-bold ${verdictColor} mt-0.5">${verdictTitle}</h3></div>
-                <div class="sm:text-right"><span class="text-[10px] sm:text-xs text-slate-400">Total Outlay</span>
-                <div class="text-sm sm:text-base font-bold">${formatCurrency(cost)}</div></div>
+                <div>
+                  <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-400">Verdict</span>
+                  <h3 class="text-base sm:text-lg font-bold ${verdictColor} mt-0.5">${verdictTitle}</h3>
+                </div>
+                <div class="sm:text-right">
+                  <span class="text-[10px] sm:text-xs text-slate-400">Total Purchase Price</span>
+                  <div class="text-sm sm:text-base font-bold">${formatCurrency(cost)}</div>
+                </div>
               </div>
+
               <p class="text-[13px] sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">${rationale}</p>
-              <div class="grid grid-cols-2 gap-3 py-2">
-                <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm"><span class="text-[10px] font-semibold text-slate-400 block uppercase">Rec. Cash</span><span class="text-base font-bold mt-1 block">${formatCurrency(cashToPay)}</span></div>
-                <div class="p-3 sm:p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm"><span class="text-[10px] font-semibold text-slate-400 block uppercase">Rec. Loan</span><span class="text-base font-bold ${loanAmount > 0 ? 'text-amber-600' : 'text-slate-400'} mt-1 block">${formatCurrency(loanAmount)}</span></div>
-              </div>
+
+              ${cardsHtml}
+
               <div class="bg-slate-100/50 dark:bg-slate-800/50 p-3 sm:p-4 rounded-xl mt-2">
-                <span class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2 block flex items-center"><i data-lucide="info" class="w-3.5 h-3.5 mr-1.5 text-blue-500"></i> Advisor Notes:</span>
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-2 block flex items-center">
+                  <i data-lucide="info" class="w-3.5 h-3.5 mr-1.5 text-blue-500"></i> Advisor Analysis & Alternatives:
+                </span>
                 <ul class="text-[11px] sm:text-xs space-y-2 text-slate-600 dark:text-slate-300">
                   ${recommendations.map(r => `<li class="flex items-start"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500 mr-2 flex-shrink-0 mt-0.5"></i><span class="leading-relaxed">${r}</span></li>`).join('')}
                 </ul>
@@ -1335,6 +1461,7 @@
         if(window.innerWidth < 1024) document.getElementById('affordabilityResult').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
+    // Dark Mode
     const initializeTheme = () => {
         const savedTheme = localStorage.getItem('wealthflow_theme');
         if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark'); }
@@ -1356,26 +1483,8 @@
       updateThemeIcon();
     });
 
-    document.getElementById('exportCsvBtn').addEventListener('click', () => {
-      const b = getBuckets();
-      let csv = `YYYY/MM/DD,${b.b1},${b.b2},${b.b3},${b.b4}${b.hasB5 ? ',' + b.b5 : ''},liability/pending,Total Assets,Total Net Wealth\n`;
-      portfolio.forEach(row => {
-        const m = calculateMetrics(row);
-        csv += `${row.date},${m.b1},${m.b2},${m.b3},${m.b4}${b.hasB5 ? ',' + m.b5 : ''},${m.liability},${m.totalAssets},${m.netWealth}\n`;
-      });
-
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `WealthFlow_Export_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-
-    // Initialize UI
-    updateCurrencyLabels();
+    // Initialize
+    updateCurrencyLabels(); 
     initializeTheme();
     document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
     const d = new Date(); document.getElementById('formIncDate').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
