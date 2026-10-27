@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WealthFlow | Personal Investment & Affordability Suite</title>
+  <!-- Tailwind CSS & Lucide Icons & Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0fdf4', 500: '#10b981', 600: '#059669', 700: '#047857' },
+            slate: { 850: '#151f32', 900: '#0f172a', 950: '#080d1a' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .dark .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+  <!-- Navigation / Top Bar -->
+  <header class="glass-card sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md shadow-emerald-500/20">
+          <i data-lucide="trending-up" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">WealthFlow</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Portfolio Tracker & Purchase Advisor</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <div class="hidden sm:flex items-center text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+          <i data-lucide="bell-ring" class="w-3.5 h-3.5 mr-1.5 animate-pulse"></i> Next Sheet Update: 30th
+        </div>
+        <button id="themeToggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+          <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- KPI Summary Row -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="glass-card rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+          <span>Net Wealth</span>
+          <span class="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-950 text-emerald-600"><i data-lucide="shield-check" class="w-4 h-4"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-bold" id="kpiNetWealth">¥0</div>
+        <div class="mt-1 text-xs text-emerald-600 dark:text-emerald-400 flex items-center" id="kpiNetWealthGrowth">
+          <i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> Positive Trajectory
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+          <span>Total Liquid & Invested</span>
+          <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600"><i data-lucide="pie-chart" class="w-4 h-4"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-bold" id="kpiTotalAssets">¥0</div>
+        <div class="mt-1 text-xs text-slate-500">Cash, NISA, ESOP & DC Pension</div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+          <span>Pending Liabilities</span>
+          <span class="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600"><i data-lucide="arrow-down-circle" class="w-4 h-4"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-bold text-rose-600 dark:text-rose-400" id="kpiPendingDebt">¥0</div>
+        <div class="mt-1 text-xs text-slate-500">Remaining loan balance</div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider">
+          <span>Emergency Reserve</span>
+          <span class="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-950 text-amber-600"><i data-lucide="wallet" class="w-4 h-4"></i></span>
+        </div>
+        <div class="mt-3 text-2xl font-bold" id="kpiEmergencyFund">¥0</div>
+        <div class="mt-1 text-xs text-slate-500" id="kpiEmergencyRunway">Available immediate cash</div>
+      </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="glass-card rounded-2xl p-6 shadow-sm lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base font-bold">Net Wealth & Growth Progression</h2>
+            <p class="text-xs text-slate-500">Historical trend from your recorded entries</p>
+          </div>
+          <span class="text-xs font-medium px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Monthly</span>
+        </div>
+        <div class="h-72">
+          <canvas id="growthChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-base font-bold">Asset Allocation</h2>
+            <p class="text-xs text-slate-500">Latest distribution snapshot</p>
+          </div>
+        </div>
+        <div class="h-64 flex items-center justify-center">
+          <canvas id="allocationChart"></canvas>
+        </div>
+        <div id="allocationLegend" class="grid grid-cols-2 gap-2 mt-2 text-xs"></div>
+      </div>
+    </section>
+
+    <!-- Affordability & Loan/Cash Advisor Section -->
+    <section class="glass-card rounded-2xl p-6 sm:p-8 shadow-sm border border-emerald-500/20 bg-gradient-to-br from-white via-white to-emerald-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/20">
+      <div class="flex items-center space-x-3 mb-6">
+        <div class="p-2.5 rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/25">
+          <i data-lucide="sparkles" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="text-xl font-bold">Can I Afford It? (Purchase & Loan Advisor)</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Evaluate any target purchase (smartphone, bike, marriage, home) against your actual cash reserves, pending debt, and monthly surplus.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Input Form -->
+        <div class="lg:col-span-5 space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">What do you want to acquire or fund?</label>
+            <input type="text" id="targetItemName" placeholder="e.g., iPhone 16 Pro, Royal Enfield Bike, Marriage, Tokyo Apartment" 
+                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" value="iPhone 16 Pro" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Total Cost (¥ JPY)</label>
+              <input type="number" id="targetItemCost" placeholder="180000" 
+                     class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500" value="180000" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Purchase Category</label>
+              <select id="targetItemCategory" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                <option value="gadget">Tech & Gadgets (Phone/Laptop)</option>
+                <option value="vehicle">Vehicle (Bike/Car)</option>
+                <option value="event">Major Life Event (Marriage/Travel)</option>
+                <option value="property">Real Estate (Home/Condo)</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="calculateAffordabilityBtn" class="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition flex items-center justify-center space-x-2">
+            <i data-lucide="calculator" class="w-4 h-4"></i>
+            <span>Analyze Affordability & Financing</span>
+          </button>
+        </div>
+
+        <!-- Result Box -->
+        <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-750 rounded-2xl p-6 flex flex-col justify-between">
+          <div id="affordabilityResult">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Monthly Data Log & Sheet Sync Form -->
+    <section class="glass-card rounded-2xl p-6 sm:p-8 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
+        <div>
+          <h2 class="text-lg font-bold">Monthly Portfolio Log & Data Sheet</h2>
+          <p class="text-xs text-slate-500">Enter monthly updates here. Data is saved locally and can be exported directly to your CSV/Excel spreadsheet.</p>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button id="exportCsvBtn" class="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition flex items-center space-x-1.5">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Export Updated CSV</span>
+          </button>
+          <button id="toggleAddModal" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md shadow-emerald-600/20 transition flex items-center space-x-1.5">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <span>Add Monthly Entry</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Add Form -->
+      <form id="newEntryForm" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 py-6">
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Date (YYYY-MM-DD)</label>
+          <input type="date" id="formDate" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Emergency Fund (¥)</label>
+          <input type="number" id="formEmergency" step="any" required placeholder="307002" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">NISA Balance (¥)</label>
+          <input type="number" id="formNisa" step="any" required placeholder="73355" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">ESOP Balance (¥)</label>
+          <input type="number" id="formEsop" step="any" required placeholder="78214" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">DC Pension (¥)</label>
+          <input type="number" id="formDc" step="any" required placeholder="60730" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Pending Loan (¥)</label>
+          <input type="number" id="formLiability" step="any" required placeholder="283730" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs" />
+        </div>
+        <div class="col-span-2 sm:col-span-3 lg:col-span-6 flex justify-end">
+          <button type="submit" class="px-5 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-semibold hover:opacity-90 transition">
+            Save Record to Sheet
+          </button>
+        </div>
+      </form>
+
+      <!-- History Table -->
+      <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-slate-100/70 dark:bg-slate-900/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-800">
+              <th class="p-3">Date</th>
+              <th class="p-3">Emergency Fund</th>
+              <th class="p-3">NISA</th>
+              <th class="p-3">ESOP</th>
+              <th class="p-3">DC Pension</th>
+              <th class="p-3">Total Assets</th>
+              <th class="p-3">Pending Liability</th>
+              <th class="p-3">Net Wealth</th>
+              <th class="p-3 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody id="portfolioTableBody" class="divide-y divide-slate-200 dark:divide-slate-800">
+            <!-- Populated via JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // --- Initial Seed Data from your Monthly Savings Sheets ---
+    const initialPortfolioData = [
+      { date: '2026-05-31', dc: 20190, esop: 10876.2, nisa: 21626, emergency: 154956, liability: 594082 },
+      { date: '2026-06-30', dc: 23601, esop: 22004.8, nisa: 31834, emergency: 254956, liability: 594082 },
+      { date: '2026-07-04', dc: 23601, esop: 55001.1, nisa: 31834, emergency: 156947, liability: 283730 },
+      { date: '2026-07-30', dc: 29432, esop: 50193.0, nisa: 42204, emergency: 206947, liability: 283730 },
+      { date: '2026-08-30', dc: 36294, esop: 64166.7, nisa: 52104, emergency: 207002, liability: 283730 },
+      { date: '2026-09-30', dc: 50023, esop: 67071.9, nisa: 63449, emergency: 257002, liability: 283730 },
+      { date: '2026-10-30', dc: 60730, esop: 78214.3, nisa: 73355, emergency: 307002, liability: 283730 }
+    ];
+
+    let portfolio = JSON.parse(localStorage.getItem('wealthflow_portfolio')) || initialPortfolioData;
+
+    // Format Currency Helper (JPY)
+    function formatJPY(val) {
+      return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(val);
+    }
+
+    let growthChartInstance = null;
+    let allocationChartInstance = null;
+
+    function calculateMetrics(entry) {
+      const totalAssets = entry.emergency + entry.nisa + entry.esop + entry.dc;
+      const netWealth = totalAssets - entry.liability;
+      return { totalAssets, netWealth };
+    }
+
+    function renderDashboard() {
+      // Sort portfolio by date
+      portfolio.sort((a, b) => new Date(a.date) - new Date(b.date));
+      localStorage.setItem('wealthflow_portfolio', JSON.stringify(portfolio));
+
+      const latest = portfolio[portfolio.length - 1];
+      const prev = portfolio.length > 1 ? portfolio[portfolio.length - 2] : latest;
+
+      const latestMetrics = calculateMetrics(latest);
+      const prevMetrics = calculateMetrics(prev);
+
+      // Update KPI Cards
+      document.getElementById('kpiNetWealth').textContent = formatJPY(latestMetrics.netWealth);
+      document.getElementById('kpiTotalAssets').textContent = formatJPY(latestMetrics.totalAssets);
+      document.getElementById('kpiPendingDebt').textContent = formatJPY(latest.liability);
+      document.getElementById('kpiEmergencyFund').textContent = formatJPY(latest.emergency);
+
+      const netWealthDiff = latestMetrics.netWealth - prevMetrics.netWealth;
+      const growthEl = document.getElementById('kpiNetWealthGrowth');
+      if (netWealthDiff >= 0) {
+        growthEl.className = "mt-1 text-xs text-emerald-600 dark:text-emerald-400 flex items-center";
+        growthEl.innerHTML = `<i data-lucide="arrow-up-right" class="w-3.5 h-3.5 mr-0.5"></i> +${formatJPY(netWealthDiff)} since last month`;
+      } else {
+        growthEl.className = "mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center";
+        growthEl.innerHTML = `<i data-lucide="arrow-down-right" class="w-3.5 h-3.5 mr-0.5"></i> ${formatJPY(netWealthDiff)} since last month`;
+      }
+
+      // Render Table Rows
+      const tbody = document.getElementById('portfolioTableBody');
+      tbody.innerHTML = '';
+      portfolio.slice().reverse().forEach((row, revIdx) => {
+        const actualIdx = portfolio.length - 1 - revIdx;
+        const m = calculateMetrics(row);
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-semibold">${row.date}</td>
+          <td class="p-3">${formatJPY(row.emergency)}</td>
+          <td class="p-3">${formatJPY(row.nisa)}</td>
+          <td class="p-3">${formatJPY(row.esop)}</td>
+          <td class="p-3">${formatJPY(row.dc)}</td>
+          <td class="p-3 font-medium text-blue-600 dark:text-blue-400">${formatJPY(m.totalAssets)}</td>
+          <td class="p-3 font-medium text-rose-500">${formatJPY(row.liability)}</td>
+          <td class="p-3 font-bold ${m.netWealth >= 0 ? 'text-emerald-600' : 'text-amber-500'}">${formatJPY(m.netWealth)}</td>
+          <td class="p-3 text-center">
+            <button onclick="deleteEntry(${actualIdx})" class="text-slate-400 hover:text-rose-500 transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      renderCharts(latest);
+      lucide.createIcons();
+    }
+
+    function renderCharts(latest) {
+      const dates = portfolio.map(e => e.date);
+      const netWealths = portfolio.map(e => calculateMetrics(e).netWealth);
+      const totalAssets = portfolio.map(e => calculateMetrics(e).totalAssets);
+      const liabilities = portfolio.map(e => e.liability);
+
+      // 1. Growth Area Chart
+      const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+      if (growthChartInstance) growthChartInstance.destroy();
+
+      growthChartInstance = new Chart(ctxGrowth, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: [
+            {
+              label: 'Net Wealth',
+              data: netWealths,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.12)',
+              borderWidth: 2.5,
+              tension: 0.35,
+              fill: true,
+              pointBackgroundColor: '#10b981',
+              pointRadius: 4
+            },
+            {
+              label: 'Total Assets',
+              data: totalAssets,
+              borderColor: '#3b82f6',
+              borderDash: [5, 5],
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.35,
+              fill: false
+            },
+            {
+              label: 'Pending Loan',
+              data: liabilities,
+              borderColor: '#f43f5e',
+              borderWidth: 1.5,
+              pointRadius: 0,
+              tension: 0.35,
+              fill: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.dataset.label}: ${formatJPY(ctx.parsed.y)}`
+              }
+            }
+          },
+          scales: {
+            y: {
+              ticks: { callback: (v) => '¥' + (v / 1000).toLocaleString() + 'k' },
+              grid: { color: 'rgba(156, 163, 175, 0.1)' }
+            },
+            x: { grid: { display: false } }
+          }
+        }
+      });
+
+      // 2. Allocation Doughnut Chart
+      const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
+      if (allocationChartInstance) allocationChartInstance.destroy();
+
+      const allocData = [latest.emergency, latest.nisa, latest.esop, latest.dc];
+      const allocLabels = ['Cash Savings', 'NISA', 'ESOP', 'DC Pension'];
+      const allocColors = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
+
+      allocationChartInstance = new Chart(ctxAlloc, {
+        type: 'doughnut',
+        data: {
+          labels: allocLabels,
+          datasets: [{
+            data: allocData,
+            backgroundColor: allocColors,
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => `${ctx.label}: ${formatJPY(ctx.parsed)} (${((ctx.parsed / allocData.reduce((a, b) => a + b, 0)) * 100).toFixed(1)}%)`
+              }
+            }
+          },
+          cutout: '72%'
+        }
+      });
+
+      // Build custom legend
+      const totalAlloc = allocData.reduce((a, b) => a + b, 0);
+      const legContainer = document.getElementById('allocationLegend');
+      legContainer.innerHTML = allocLabels.map((lbl, idx) => `
+        <div class="flex items-center space-x-1.5">
+          <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${allocColors[idx]}"></span>
+          <span class="text-slate-500">${lbl}:</span>
+          <span class="font-semibold">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span>
+        </div>
+      `).join('');
+    }
+
+    // Affordability Decision Engine
+    function evaluateAffordability() {
+      const name = document.getElementById('targetItemName').value.trim() || 'Target Item';
+      const cost = parseFloat(document.getElementById('targetItemCost').value) || 0;
+      const category = document.getElementById('targetItemCategory').value;
+
+      const latest = portfolio[portfolio.length - 1];
+      const currentCash = latest.emergency;
+      const monthlyNetSalary = 270000; // Average net salary based on your records
+      const baselineEmergencyBuffer = 200000; // Minimum safety buffer to keep untouched
+      const usableLiquidCash = Math.max(0, currentCash - baselineEmergencyBuffer);
+
+      let canAfford = false;
+      let cashToPay = 0;
+      let loanAmount = 0;
+      let verdictTitle = "";
+      let verdictColor = "";
+      let rationale = "";
+      let recommendations = [];
+
+      switch (category) {
+        case 'gadget': // Phones, Laptops, Gadgets
+          // Rule: Never take consumer loans / high-interest debt for gadgets
+          if (cost <= usableLiquidCash) {
+            canAfford = true;
+            cashToPay = cost;
+            loanAmount = 0;
+            verdictTitle = "Fully Affordable (100% Cash)";
+            verdictColor = "text-emerald-600 dark:text-emerald-400";
+            rationale = `You can buy <strong>${name}</strong> outright in cash without breaching your minimum emergency threshold of ${formatJPY(baselineEmergencyBuffer)}.`;
+            recommendations.push("Pay 100% in cash. Never use high-interest consumer credit or loan installments for tech gadgets.");
+            recommendations.push(`Remaining cash reserve after purchase: <strong>${formatJPY(currentCash - cost)}</strong>.`);
+          } else {
+            canAfford = false;
+            cashToPay = 0;
+            loanAmount = 0;
+            const shortfall = cost - usableLiquidCash;
+            const monthsToSave = Math.ceil(shortfall / 40000); // assuming ¥40k/mo savings capacity
+            verdictTitle = "Not Recommended Right Now";
+            verdictColor = "text-rose-600 dark:text-rose-400";
+            rationale = `Buying ${name} in cash right now would deplete your safety buffer below safe levels.`;
+            recommendations.push("<strong>Do NOT take an EMI or personal loan</strong> for consumer electronics (interest rates erode net wealth).");
+            recommendations.push(`<strong>Adjustment Plan:</strong> Save approximately ¥40,000 for <strong>${monthsToSave} more month(s)</strong> to purchase it comfortably without touching emergency reserves.`);
+          }
+          break;
+
+        case 'vehicle': // Bike or Car
+          // Rule: 30-50% down payment minimum, remaining on low-rate vehicle loan if EMI < 15% net salary
+          const vehicleDownPayment = Math.min(cost * 0.4, usableLiquidCash);
+          const vehicleLoan = cost - vehicleDownPayment;
+          const estimatedBikeEmi = vehicleLoan > 0 ? (vehicleLoan * 1.04) / 24 : 0; // 24 mo at ~4%
+
+          if (usableLiquidCash >= cost * 0.3 && estimatedBikeEmi <= (monthlyNetSalary * 0.15)) {
+            canAfford = true;
+            cashToPay = Math.round(vehicleDownPayment);
+            loanAmount = Math.round(vehicleLoan);
+            verdictTitle = "Affordable with Prudent Split";
+            verdictColor = "text-emerald-600 dark:text-emerald-400";
+            rationale = `You can purchase <strong>${name}</strong> using a hybrid down payment + low-rate vehicle loan.`;
+            recommendations.push(`Down Payment (Cash): <strong>${formatJPY(cashToPay)}</strong> (keeps your emergency cushion safe).`);
+            recommendations.push(`Vehicle Loan: <strong>${formatJPY(loanAmount)}</strong> across 24 months (Est. EMI: ~${formatJPY(estimatedBikeEmi)}/mo, well under 15% of your ¥270k net income).`);
+          } else {
+            canAfford = false;
+            verdictTitle = "Wait & Strengthen Liquidity";
+            verdictColor = "text-amber-500";
+            const downShortfall = (cost * 0.4) - usableLiquidCash;
+            rationale = `Your liquid cash is currently below the recommended 40% down payment buffer (${formatJPY(cost * 0.4)}).`;
+            recommendations.push(`Save an additional <strong>${formatJPY(Math.max(0, downShortfall))}</strong> in liquid cash before proceeding.`);
+            recommendations.push("Avoid zero-down loans, which come with steep dealer interest rates.");
+          }
+          break;
+
+        case 'event': // Marriage, Major Travel
+          // Rule: Never fund life celebrations on personal loans (interest 10-15% is toxic)
+          if (usableLiquidCash >= cost) {
+            canAfford = true;
+            cashToPay = cost;
+            loanAmount = 0;
+            verdictTitle = "Affordable in Cash";
+            verdictColor = "text-emerald-600";
+            rationale = `Your liquid savings can fully cover <strong>${name}</strong> without borrowing.`;
+            recommendations.push("Pay 100% from savings. Avoid personal loans for weddings or events at all costs.");
+          } else {
+            canAfford = false;
+            const weddingShortfall = cost - usableLiquidCash;
+            const monthsNeeded = Math.ceil(weddingShortfall / 60000);
+            verdictTitle = "Requires Target Planning";
+            verdictColor = "text-rose-500";
+            rationale = `Personal loans for lifestyle events like ${name} carry 10%–14% interest and risk reversing your net wealth gains.`;
+            recommendations.push(`<strong>Cash Shortfall:</strong> ${formatJPY(weddingShortfall)}.`);
+            recommendations.push(`<strong>Adjustment Strategy:</strong> Temporarily pause extra NISA/ESOP allocations and reallocate ¥60,000/mo into emergency/liquid cash for <strong>${monthsNeeded} months</strong>.`);
+          }
+          break;
+
+        case 'property': // Real Estate / Home
+          // Rule: 10-20% down payment + closing costs; Mortgage with EMI <= 25% of net salary
+          const reqDown = cost * 0.15;
+          const mortAmount = cost * 0.85;
+          const estMortgageEmi = (mortAmount * 0.012) / 12 + (mortAmount / 360); // approx Japan 1.2% 30yr
+
+          if (usableLiquidCash >= reqDown && estMortgageEmi <= (monthlyNetSalary * 0.30)) {
+            canAfford = true;
+            cashToPay = Math.round(reqDown);
+            loanAmount = Math.round(mortAmount);
+            verdictTitle = "Feasible Home Purchase";
+            verdictColor = "text-emerald-600";
+            rationale = `Meets the 15% down payment test and estimated mortgage is within safe debt-to-income limits.`;
+            recommendations.push(`Cash Down Payment: <strong>${formatJPY(cashToPay)}</strong>.`);
+            recommendations.push(`Housing Mortgage: <strong>${formatJPY(loanAmount)}</strong> (Est. Monthly payment: ~${formatJPY(estMortgageEmi)}/mo).`);
+          } else {
+            canAfford = false;
+            verdictTitle = "Long-Term Goal (Accumulate Seed Down Payment)";
+            verdictColor = "text-amber-500";
+            const downShortfall = reqDown - usableLiquidCash;
+            rationale = `Buying property requires at least 15% down payment + reserves (${formatJPY(reqDown)}).`;
+            recommendations.push(`<strong>Down Payment Shortfall:</strong> ${formatJPY(Math.max(0, downShortfall))}.`);
+            recommendations.push(`Continue compounding NISA & ESOP assets to reach the required lump sum.`);
+          }
+          break;
+      }
+
+      // Display results
+      const resContainer = document.getElementById('affordabilityResult');
+      resContainer.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+            <div>
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Analysis Verdict</span>
+              <h3 class="text-lg font-bold ${verdictColor}">${verdictTitle}</h3>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400">Total Outlay</span>
+              <div class="text-base font-bold">${formatJPY(cost)}</div>
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${rationale}</p>
+
+          <div class="grid grid-cols-2 gap-3 py-2">
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <span class="text-[11px] text-slate-400 block">Recommended Cash</span>
+              <span class="text-sm font-bold text-slate-800 dark:text-slate-100">${formatJPY(cashToPay)}</span>
+            </div>
+            <div class="p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+              <span class="text-[11px] text-slate-400 block">Recommended Loan</span>
+              <span class="text-sm font-bold ${loanAmount > 0 ? 'text-amber-600' : 'text-slate-400'}">${formatJPY(loanAmount)}</span>
+            </div>
+          </div>
+
+          <div>
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 block">Advisor Recommendations & Rebalancing:</span>
+            <ul class="text-xs space-y-1.5 text-slate-600 dark:text-slate-300">
+              ${recommendations.map(r => `<li class="flex items-start"><i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-500 mr-1.5 mt-0.5 flex-shrink-0"></i><span>${r}</span></li>`).join('')}
+            </ul>
+          </div>
+        </div>
+      `;
+      lucide.createIcons();
+    }
+
+    // Form submission handler
+    document.getElementById('newEntryForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newEntry = {
+        date: document.getElementById('formDate').value,
+        emergency: parseFloat(document.getElementById('formEmergency').value) || 0,
+        nisa: parseFloat(document.getElementById('formNisa').value) || 0,
+        esop: parseFloat(document.getElementById('formEsop').value) || 0,
+        dc: parseFloat(document.getElementById('formDc').value) || 0,
+        liability: parseFloat(document.getElementById('formLiability').value) || 0
+      };
+
+      // Check if entry for date already exists, update or add
+      const existingIdx = portfolio.findIndex(item => item.date === newEntry.date);
+      if (existingIdx >= 0) {
+        portfolio[existingIdx] = newEntry;
+      } else {
+        portfolio.push(newEntry);
+      }
+
+      renderDashboard();
+      evaluateAffordability();
+      alert(`Portfolio record for ${newEntry.date} saved successfully!`);
+    });
+
+    // Delete Entry Helper
+    window.deleteEntry = function(index) {
+      if (confirm(`Delete record for ${portfolio[index].date}?`)) {
+        portfolio.splice(index, 1);
+        renderDashboard();
+      }
+    };
+
+    // CSV Export Handler
+    document.getElementById('exportCsvBtn').addEventListener('click', () => {
+      let csv = 'YYYY/MM/DD,Emergency Fund/Balance,NISA/balance,ESOP/balance,DC Pension Fund/Balance,liability/pending,Total Assets,Total Net Wealth\n';
+      portfolio.forEach(row => {
+        const m = calculateMetrics(row);
+        csv += `${row.date},${row.emergency},${row.nisa},${row.esop},${row.dc},${row.liability},${m.totalAssets},${m.netWealth}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Monthly_Savings_Updated_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    // Dark Mode Toggle
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      const isDark = document.documentElement.classList.contains('dark');
+      document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
+      lucide.createIcons();
+    });
+
+    // Affordability Button Event
+    document.getElementById('calculateAffordabilityBtn').addEventListener('click', evaluateAffordability);
+
+    // Initial Set
+    document.getElementById('formDate').value = new Date().toISOString().slice(0, 10);
+    renderDashboard();
+    evaluateAffordability();
+  </script>
+</body>
+</html>
