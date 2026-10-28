@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>WealthFlow | Personal Investment & Affordability Suite</title>
-
   
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -737,8 +736,8 @@
       { month: '2026-10', type: 'salary', net: 270899 }
     ];
 
-    let portfolio = localStorage.getItem('wealthflow_portfolio_v4') ? JSON.parse(localStorage.getItem('wealthflow_portfolio_v4')) : initialPortfolioData;
-    let incomeLog = localStorage.getItem('wealthflow_income_v4') ? JSON.parse(localStorage.getItem('wealthflow_income_v4')) : initialIncomeData;
+    let portfolio = localStorage.getItem('wealthflow_portfolio_v7') ? JSON.parse(localStorage.getItem('wealthflow_portfolio_v7')) : initialPortfolioData;
+    let incomeLog = localStorage.getItem('wealthflow_income_v7') ? JSON.parse(localStorage.getItem('wealthflow_income_v7')) : initialIncomeData;
 
     // Wipe Modal Handlers
     document.getElementById('wipeDataBtn').addEventListener('click', () => { document.getElementById('wipeModal').classList.remove('hidden'); });
@@ -746,8 +745,8 @@
     document.getElementById('confirmWipeBtn').addEventListener('click', () => {
         portfolio = [];
         incomeLog = [];
-        localStorage.setItem('wealthflow_portfolio_v4', JSON.stringify(portfolio));
-        localStorage.setItem('wealthflow_income_v4', JSON.stringify(incomeLog));
+        localStorage.setItem('wealthflow_portfolio_v7', JSON.stringify(portfolio));
+        localStorage.setItem('wealthflow_income_v7', JSON.stringify(incomeLog));
         
         document.getElementById('wipeModal').classList.add('hidden');
         renderDashboard();
@@ -794,7 +793,7 @@
       }
 
       portfolio.sort((a, b) => new Date(a.date) - new Date(b.date));
-      localStorage.setItem('wealthflow_portfolio_v4', JSON.stringify(portfolio));
+      localStorage.setItem('wealthflow_portfolio_v7', JSON.stringify(portfolio));
 
       const latest = portfolio[portfolio.length - 1];
       const prev = portfolio.length > 1 ? portfolio[portfolio.length - 2] : latest;
@@ -976,7 +975,7 @@
       }
 
       incomeLog.sort((a, b) => new Date(a.month) - new Date(b.month));
-      localStorage.setItem('wealthflow_income_v4', JSON.stringify(incomeLog));
+      localStorage.setItem('wealthflow_income_v7', JSON.stringify(incomeLog));
 
       const salaries = incomeLog.filter(i => i.type === 'salary');
       const bonuses = incomeLog.filter(i => i.type === 'bonus');
@@ -1536,50 +1535,24 @@
     
     async function syncFromDrive() {
         try {
-            document.getElementById('syncStatus').innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 mr-1.5 animate-spin"></i> Syncing...';
+            document.getElementById('syncStatus').innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 mr-1.5 animate-spin"></i> Syncing with ME...';
             document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 mr-2 transition-all";
             lucide.createIcons();
             
             const response = await fetch(SCRIPT_URL);
             const data = await response.json();
             
-            const drivePortfolioEmpty = (!data.portfolio || data.portfolio.length === 0);
-            const driveIncomeEmpty = (!data.income || data.income.length === 0);
-            
-            if (!drivePortfolioEmpty) {
+            if(data.portfolio && data.portfolio.length > 0) {
                 portfolio = data.portfolio;
-                localStorage.setItem('wealthflow_portfolio_v6', JSON.stringify(portfolio));
+                localStorage.setItem('wealthflow_portfolio_v7', JSON.stringify(portfolio));
             }
-            if (!driveIncomeEmpty) {
+            if(data.income && data.income.length > 0) {
                 incomeLog = data.income;
-                localStorage.setItem('wealthflow_income_v6', JSON.stringify(incomeLog));
+                localStorage.setItem('wealthflow_income_v7', JSON.stringify(incomeLog));
             }
             
-            // MAGIC AUTO-UPLOAD FOR BLANK SHEETS
-            if (drivePortfolioEmpty || driveIncomeEmpty) {
-                document.getElementById('syncStatus').innerHTML = '<i data-lucide="upload-cloud" class="w-3.5 h-3.5 mr-1.5 animate-pulse"></i> Initializing Drive...';
-                lucide.createIcons();
-                
-                fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        action: "bulkSave", 
-                        portfolio: drivePortfolioEmpty ? portfolio : [], 
-                        income: driveIncomeEmpty ? incomeLog : [] 
-                    })
-                });
-                
-                setTimeout(() => {
-                    document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-check" class="w-3.5 h-3.5 mr-1.5"></i> Drive Initialized';
-                    document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mr-2 transition-all";
-                    lucide.createIcons();
-                }, 2000);
-            } else {
-                document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-check" class="w-3.5 h-3.5 mr-1.5"></i> Drive Synced';
-                document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mr-2 transition-all";
-            }
+            document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-check" class="w-3.5 h-3.5 mr-1.5"></i> Linked to ME';
+            document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mr-2 transition-all";
             
             renderDashboard();
             renderIncomeDashboard();
@@ -1588,7 +1561,7 @@
             
         } catch(e) {
             console.error(e);
-            document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-off" class="w-3.5 h-3.5 mr-1.5"></i> Offline Mode';
+            document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-off" class="w-3.5 h-3.5 mr-1.5"></i> Offline';
             document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-rose-50 text-rose-600 dark:bg-rose-900/50 dark:text-rose-400 mr-2 transition-all";
             lucide.createIcons();
         }
