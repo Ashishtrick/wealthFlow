@@ -56,6 +56,13 @@
       </div>
 
       <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Sync Status & Button -->
+        <div id="syncStatus" class="hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 transition-all">
+          <i data-lucide="minus" class="w-3.5 h-3.5 mr-1.5"></i> Standby
+        </div>
+        <button id="manualSyncBtn" onclick="syncFromDrive()" class="p-2 sm:p-2.5 rounded-lg bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 transition flex items-center" title="Sync with Google Sheets">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        </button>
         <!-- Currency Toggle -->
         <button id="currencyToggle" class="hidden sm:flex px-2 sm:px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition text-xs font-bold items-center" aria-label="Toggle Currency">
           <span id="currencyText">¥ JPY</span>
