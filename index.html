@@ -1546,7 +1546,11 @@
             document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 mr-2 transition-all";
             lucide.createIcons();
             
-            const response = await fetch(SCRIPT_URL);
+            const response = await fetch(SCRIPT_URL, {
+                method: "GET",
+                mode: "cors", 
+                redirect: "follow"
+            });
             const data = await response.json();
             
             if(data.portfolio && data.portfolio.length > 0) {
