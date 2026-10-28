@@ -1542,17 +1542,43 @@
             const response = await fetch(SCRIPT_URL);
             const data = await response.json();
             
-            if(data.portfolio && data.portfolio.length > 0) {
+            const drivePortfolioEmpty = (!data.portfolio || data.portfolio.length === 0);
+            const driveIncomeEmpty = (!data.income || data.income.length === 0);
+            
+            if (!drivePortfolioEmpty) {
                 portfolio = data.portfolio;
                 localStorage.setItem('wealthflow_portfolio_v6', JSON.stringify(portfolio));
             }
-            if(data.income && data.income.length > 0) {
+            if (!driveIncomeEmpty) {
                 incomeLog = data.income;
                 localStorage.setItem('wealthflow_income_v6', JSON.stringify(incomeLog));
             }
             
-            document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-check" class="w-3.5 h-3.5 mr-1.5"></i> Drive Synced';
-            document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mr-2 transition-all";
+            // MAGIC AUTO-UPLOAD FOR BLANK SHEETS
+            if (drivePortfolioEmpty || driveIncomeEmpty) {
+                document.getElementById('syncStatus').innerHTML = '<i data-lucide="upload-cloud" class="w-3.5 h-3.5 mr-1.5 animate-pulse"></i> Initializing Drive...';
+                lucide.createIcons();
+                
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: "bulkSave", 
+                        portfolio: drivePortfolioEmpty ? portfolio : [], 
+                        income: driveIncomeEmpty ? incomeLog : [] 
+                    })
+                });
+                
+                setTimeout(() => {
+                    document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-check" class="w-3.5 h-3.5 mr-1.5"></i> Drive Initialized';
+                    document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mr-2 transition-all";
+                    lucide.createIcons();
+                }, 2000);
+            } else {
+                document.getElementById('syncStatus').innerHTML = '<i data-lucide="cloud-check" class="w-3.5 h-3.5 mr-1.5"></i> Drive Synced';
+                document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/50 dark:text-emerald-400 mr-2 transition-all";
+            }
             
             renderDashboard();
             renderIncomeDashboard();
