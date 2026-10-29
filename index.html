@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +12,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -97,6 +97,17 @@
     <!-- ==================== TAB 1: PORTFOLIO & AFFORDABILITY ==================== -->
     <div id="view-portfolio">
         
+        <!-- NISA Visualizer -->
+        <section class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm mb-6" id="nisaVisualizer" style="display:none;">
+            <div class="flex items-center justify-between mb-2">
+                <div class="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center"><i data-lucide="trending-up" class="w-3.5 h-3.5 mr-1.5 text-indigo-500"></i>NISA Lifetime Allowance (¥18M)</div>
+                <div class="text-xs font-bold text-indigo-600 dark:text-indigo-400" id="nisaProgressText">0 / 18,000,000</div>
+            </div>
+            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 shadow-inner">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2.5 rounded-full transition-all duration-1000 ease-out" id="nisaProgressBar" style="width: 0%"></div>
+            </div>
+        </section>
+
         <!-- Top KPIs -->
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6">
           <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
@@ -382,10 +393,10 @@
         <section class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm col-span-2 lg:col-span-1">
             <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-              <span>Avg Monthly Net</span>
+              <span id="avgIncomeLabel">Avg Monthly Net</span>
               <span class="p-1.5 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-600"><i data-lucide="banknote" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i></span>
             </div>
-            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400" id="kpiAvgNet">0</div>
+            <div class="mt-2 sm:mt-3 text-xl sm:text-2xl font-bold text-blue-600 dark:text-blue-400" id="kpiAvgIncome">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500 flex items-center">
               Rolling 12 months
             </div>
@@ -393,9 +404,9 @@
           
           <div class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm">
             <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-semibold uppercase tracking-wider">
-              <span>Latest Net Pay</span>
+              <span id="latestIncomeLabel">Latest Net Pay</span>
             </div>
-            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiLatestNet">0</div>
+            <div class="mt-2 sm:mt-3 text-lg sm:text-xl font-bold" id="kpiLatestIncome">0</div>
             <div class="mt-1 text-[10px] sm:text-xs text-slate-500" id="kpiLatestMonth">No Data</div>
           </div>
           
@@ -426,12 +437,19 @@
           <div class="mt-2 text-xl font-bold" id="kpiYtdTotalMobile">0</div>
         </section>
 
-        <!-- Income Charts -->
-        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <!-- Income Charts with Toggle -->
+        <div class="flex justify-end mb-[-10px]">
+            <div class="bg-slate-200 dark:bg-slate-800 rounded-lg p-1 flex text-xs font-semibold inline-flex relative z-10">
+                <button id="toggleNetBtn" class="px-3 py-1.5 rounded-md bg-white dark:bg-slate-900 shadow-sm text-blue-600 dark:text-blue-400 transition" onclick="setIncomeMode('net')">Net</button>
+                <button id="toggleGrossBtn" class="px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition" onclick="setIncomeMode('gross')">Gross</button>
+            </div>
+        </div>
+        
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-0">
             <div class="glass-card rounded-2xl p-4 sm:p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
                   <div>
-                    <h2 class="text-sm sm:text-base font-bold">Monthly Trend (Net)</h2>
+                    <h2 class="text-sm sm:text-base font-bold" id="incomeChartTitle">Monthly Trend (Net)</h2>
                   </div>
                 </div>
                 <div class="h-60 sm:h-72 w-full flex items-center justify-center" id="incomeChartContainer">
@@ -456,11 +474,11 @@
             <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 sm:pb-6 border-b border-slate-200 dark:border-slate-800 gap-4">
                 <div>
                   <h2 class="text-base sm:text-lg font-bold">Income & Bonus Log</h2>
-                  <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Track your net monthly pay and bonuses.</p>
+                  <p class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Track your monthly pay and bonuses.</p>
                 </div>
             </div>
             
-            <form id="newIncomeForm" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 py-5 sm:py-6">
+            <form id="newIncomeForm" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 py-5 sm:py-6">
                 <div>
                   <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Date (Month)</label>
                   <input type="month" id="formIncDate" required class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
@@ -473,10 +491,14 @@
                   </select>
                 </div>
                 <div class="col-span-2 sm:col-span-1">
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Gross Income (<span class="currency-label-short">¥</span>)</label>
+                  <input type="number" id="formIncGross" inputmode="numeric" placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
+                </div>
+                <div class="col-span-2 sm:col-span-1">
                   <label class="block text-[11px] font-semibold text-slate-500 mb-1.5">Net Income (<span class="currency-label-short">¥</span>)</label>
                   <input type="number" id="formIncNet" inputmode="numeric" required placeholder="0" class="w-full px-3 py-2.5 sm:py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm sm:text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none" />
                 </div>
-                <div class="col-span-2 sm:col-span-1 lg:col-span-2 flex justify-end mt-2 sm:mt-0 items-end">
+                <div class="col-span-2 sm:col-span-2 lg:col-span-2 flex justify-end mt-2 sm:mt-0 items-end">
                   <button type="submit" class="w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-xs font-semibold active:scale-[0.98] transition flex items-center justify-center space-x-1.5">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i>
                     <span>Log Income</span>
@@ -490,7 +512,8 @@
                   <tr class="bg-slate-100/70 dark:bg-slate-800/70 text-slate-500 dark:text-slate-400 font-semibold border-b border-slate-200 dark:border-slate-700">
                     <th class="p-3.5 whitespace-nowrap">Month</th>
                     <th class="p-3.5 whitespace-nowrap">Type</th>
-                    <th class="p-3.5 whitespace-nowrap text-right">Net Income</th>
+                    <th class="p-3.5 whitespace-nowrap text-right">Gross</th>
+                    <th class="p-3.5 whitespace-nowrap text-right">Net</th>
                     <th class="p-3.5 text-center whitespace-nowrap">Action</th>
                   </tr>
                 </thead>
@@ -573,6 +596,26 @@
     window.addEventListener('resize', setMobileViewportHeight);
     setMobileViewportHeight();
 
+    let incomeMode = 'net'; // 'net' or 'gross'
+
+    function setIncomeMode(mode) {
+        incomeMode = mode;
+        if(mode === 'net') {
+            document.getElementById('toggleNetBtn').className = "px-3 py-1.5 rounded-md bg-white dark:bg-slate-900 shadow-sm text-blue-600 dark:text-blue-400 transition";
+            document.getElementById('toggleGrossBtn').className = "px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition";
+            document.getElementById('incomeChartTitle').textContent = "Monthly Trend (Net)";
+            document.getElementById('avgIncomeLabel').textContent = "Avg Monthly Net";
+            document.getElementById('latestIncomeLabel').textContent = "Latest Net Pay";
+        } else {
+            document.getElementById('toggleGrossBtn').className = "px-3 py-1.5 rounded-md bg-white dark:bg-slate-900 shadow-sm text-blue-600 dark:text-blue-400 transition";
+            document.getElementById('toggleNetBtn').className = "px-3 py-1.5 rounded-md text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition";
+            document.getElementById('incomeChartTitle').textContent = "Monthly Trend (Gross)";
+            document.getElementById('avgIncomeLabel').textContent = "Avg Monthly Gross";
+            document.getElementById('latestIncomeLabel').textContent = "Latest Gross Pay";
+        }
+        renderIncomeDashboard();
+    }
+
     // --- Tab Switching Logic ---
     function switchTab(tabName) {
         document.getElementById('view-portfolio').classList.toggle('hidden', tabName !== 'portfolio');
@@ -588,11 +631,9 @@
     // --- Currency & Bucket Logic ---
     let currentCurrency = localStorage.getItem('wealthflow_currency') || 'JPY';
     
-    // Default bucket names based on region
     const defaultBucketsJPY = { b1: "Emergency Fund", b2: "NISA", b3: "ESOP", b4: "DC Pension", hasB5: false, b5: "Custom" };
     const defaultBucketsINR = { b1: "Liquid / FD", b2: "SIP / MF", b3: "ESOP", b4: "EPF / NPS", hasB5: false, b5: "Gold / SGB" };
     
-    // Load saved preferences or fallback to defaults
     let bucketPrefs = JSON.parse(localStorage.getItem('wealthflow_buckets')) || null;
     
     function getBuckets() {
@@ -603,7 +644,7 @@
     function getCurrencyConfig() {
         return currentCurrency === 'JPY' 
             ? { locale: 'ja-JP', curr: 'JPY', symbol: '¥', label: '¥ JPY', fallbackK: 'k', defaultRate: 3.5 }
-            : { locale: 'en-IN', curr: 'INR', symbol: '₹', label: '₹ INR', fallbackK: 'k', defaultRate: 10.5 }; // INR loans are typically 9-12%
+            : { locale: 'en-IN', curr: 'INR', symbol: '₹', label: '₹ INR', fallbackK: 'k', defaultRate: 10.5 };
     }
 
     function formatCurrency(val) {
@@ -623,18 +664,13 @@
     
     function applyBucketLabels() {
         const b = getBuckets();
-        
-        // Update Form Labels
         document.querySelector('.bucket-label-1').textContent = b.b1;
         document.querySelector('.bucket-label-2').textContent = b.b2;
         document.querySelector('.bucket-label-3').textContent = b.b3;
         document.querySelector('.bucket-label-4').textContent = b.b4;
         document.querySelector('.bucket-label-5').textContent = b.b5;
-        
-        // Toggle 5th bucket visibility in form
         document.getElementById('bucketInput5').classList.toggle('hidden', !b.hasB5);
         
-        // Build Table Header
         const thead = document.getElementById('portfolioTableHeadRow');
         thead.innerHTML = `
             <th class="p-3.5 whitespace-nowrap">Date</th>
@@ -656,11 +692,8 @@
         document.querySelectorAll('.currency-label').forEach(el => el.textContent = conf.label);
         document.querySelectorAll('.currency-label-short').forEach(el => el.textContent = conf.symbol);
         
-        // Switch default interest rate hint
         const rateInput = document.getElementById('targetItemRate');
-        if(!rateInput.dataset.modified) {
-            rateInput.value = conf.defaultRate;
-        }
+        if(!rateInput.dataset.modified) rateInput.value = conf.defaultRate;
         document.getElementById('debtInterestRate').value = conf.defaultRate;
         
         applyBucketLabels();
@@ -677,7 +710,6 @@
 
     document.getElementById('currencyToggle').addEventListener('click', toggleCurrency);
     document.getElementById('currencyToggleMobile').addEventListener('click', toggleCurrency);
-    
     document.getElementById('targetItemRate').addEventListener('input', function() { this.dataset.modified = "true"; });
 
     // --- Bucket Customization Modal ---
@@ -701,7 +733,6 @@
     
     document.getElementById('saveBucketsBtn').addEventListener('click', () => {
         if (!bucketPrefs) bucketPrefs = { JPY: {...defaultBucketsJPY}, INR: {...defaultBucketsINR} };
-        
         bucketPrefs[currentCurrency] = {
             b1: document.getElementById('bucketName1').value || "Bucket 1",
             b2: document.getElementById('bucketName2').value || "Bucket 2",
@@ -710,42 +741,14 @@
             hasB5: document.getElementById('enableBucket5').checked,
             b5: document.getElementById('bucketName5').value || "Bucket 5"
         };
-        
         localStorage.setItem('wealthflow_buckets', JSON.stringify(bucketPrefs));
         document.getElementById('bucketsModal').classList.add('hidden');
         applyBucketLabels();
         renderDashboard();
     });
 
-    // --- Data Store ---
-    // Added b5 to schema. Older data will map undefined b5 to 0.
-    const initialPortfolioData = [
-      { date: '2026-05-31', b1: 154956, b2: 21626, b3: 10876.2, b4: 20190, b5: 0, liability: 594082 },
-      { date: '2026-06-30', b1: 254956, b2: 31834, b3: 22004.8, b4: 23601, b5: 0, liability: 594082 },
-      { date: '2026-07-04', b1: 156947, b2: 31834, b3: 55001.1, b4: 23601, b5: 0, liability: 283730 },
-      { date: '2026-07-30', b1: 206947, b2: 42204, b3: 50193.0, b4: 29432, b5: 0, liability: 283730 },
-      { date: '2026-08-30', b1: 207002, b2: 52104, b3: 64166.7, b4: 36294, b5: 0, liability: 283730 },
-      { date: '2026-09-30', b1: 257002, b2: 63449, b3: 67071.9, b4: 50023, b5: 0, liability: 283730 },
-      { date: '2026-10-30', b1: 307002, b2: 73355, b3: 78214.3, b4: 60730, b5: 0, liability: 283730 }
-    ];
-    
-    const initialIncomeData = [
-      { month: '2025-12', type: 'salary', net: 227176 },
-      { month: '2026-01', type: 'salary', net: 282231 },
-      { month: '2026-02', type: 'salary', net: 265193 },
-      { month: '2026-03', type: 'salary', net: 260559 },
-      { month: '2026-04', type: 'salary', net: 283121 },
-      { month: '2026-05', type: 'salary', net: 245140 },
-      { month: '2026-06', type: 'salary', net: 270681 },
-      { month: '2026-07', type: 'salary', net: 287143 },
-      { month: '2026-07', type: 'bonus', net: 243098 },
-      { month: '2026-08', type: 'salary', net: 273195 },
-      { month: '2026-09', type: 'salary', net: 264314 },
-      { month: '2026-10', type: 'salary', net: 270899 }
-    ];
-
-    let portfolio = localStorage.getItem('wealthflow_portfolio_v7') ? JSON.parse(localStorage.getItem('wealthflow_portfolio_v7')) : initialPortfolioData;
-    let incomeLog = localStorage.getItem('wealthflow_income_v7') ? JSON.parse(localStorage.getItem('wealthflow_income_v7')) : initialIncomeData;
+    let portfolio = localStorage.getItem('wealthflow_portfolio_v7') ? JSON.parse(localStorage.getItem('wealthflow_portfolio_v7')) : [];
+    let incomeLog = localStorage.getItem('wealthflow_income_v7') ? JSON.parse(localStorage.getItem('wealthflow_income_v7')) : [];
 
     // Wipe Modal Handlers
     document.getElementById('wipeDataBtn').addEventListener('click', () => { document.getElementById('wipeModal').classList.remove('hidden'); });
@@ -755,13 +758,11 @@
         incomeLog = [];
         localStorage.setItem('wealthflow_portfolio_v7', JSON.stringify(portfolio));
         localStorage.setItem('wealthflow_income_v7', JSON.stringify(incomeLog));
-        
         document.getElementById('wipeModal').classList.add('hidden');
         renderDashboard();
         renderIncomeDashboard();
         document.getElementById('affordabilityResult').innerHTML = '<div class="text-slate-500 text-sm text-center py-10">Add portfolio data first to use the calculator.</div>';
     });
-
 
     let growthChartInstance = null;
     let allocationChartInstance = null;
@@ -797,6 +798,7 @@
           tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-500">No portfolio data found. Add your first entry below.</td></tr>`;
           
           document.getElementById('debtAdvisorSection').classList.add('hidden');
+          document.getElementById('nisaVisualizer').style.display = 'none';
           return;
       }
 
@@ -807,6 +809,17 @@
       const prev = portfolio.length > 1 ? portfolio[portfolio.length - 2] : latest;
       const latestMetrics = calculateMetrics(latest);
       const prevMetrics = calculateMetrics(prev);
+
+      // NISA 18M Visualizer
+      if (latest.nisaPrincipal !== undefined && latest.nisaPrincipal > 0) {
+          document.getElementById('nisaVisualizer').style.display = 'block';
+          const maxNisa = 18000000;
+          const pct = Math.min(100, (latest.nisaPrincipal / maxNisa) * 100);
+          document.getElementById('nisaProgressText').textContent = formatCurrencyShort(latest.nisaPrincipal) + ' / ' + formatCurrencyShort(maxNisa);
+          setTimeout(() => { document.getElementById('nisaProgressBar').style.width = pct + '%'; }, 100);
+      } else {
+          document.getElementById('nisaVisualizer').style.display = 'none';
+      }
 
       document.getElementById('kpiNetWealth').textContent = formatCurrencyShort(latestMetrics.netWealth);
       document.getElementById('kpiTotalAssets').textContent = formatCurrencyShort(latestMetrics.totalAssets);
@@ -839,11 +852,20 @@
         const m = calculateMetrics(row);
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50/80 dark:hover:bg-slate-800/80 transition cursor-default";
+        
+        // ESOP Harvest Calculation
+        let esopHtml = formatCurrency(row.b3);
+        if (row.esopPrincipal !== undefined && row.b3 > row.esopPrincipal) {
+            const taxAmount = (row.b3 - row.esopPrincipal) * 0.20315;
+            const harvestValue = row.b3 - taxAmount;
+            esopHtml += `<div class="text-[9px] text-emerald-500 font-bold mt-0.5" title="Net Transferable after 20.315% Capital Gains Tax">Harvest: ${formatCurrency(harvestValue)}</div>`;
+        }
+
         tr.innerHTML = `
           <td class="p-3.5 font-semibold whitespace-nowrap">${row.date}</td>
           <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b1)}</td>
           <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b2)}</td>
-          <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b3)}</td>
+          <td class="p-3.5 whitespace-nowrap">${esopHtml}</td>
           <td class="p-3.5 whitespace-nowrap">${formatCurrency(row.b4)}</td>
           ${b.hasB5 ? `<td class="p-3.5 whitespace-nowrap text-emerald-600 dark:text-emerald-400">${formatCurrency(row.b5 || 0)}</td>` : ''}
           <td class="p-3.5 font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap bg-slate-50 dark:bg-slate-800/50">${formatCurrency(m.totalAssets)}</td>
@@ -864,20 +886,12 @@
     function updateDebtAdvisor(liability) {
         const rate = parseFloat(document.getElementById('debtInterestRate').value) || (currentCurrency === 'JPY' ? 3.5 : 10.5);
         const monthlyRate = (rate / 100) / 12;
-        
-        // Strategy 1: Lump sum 10% prepayment from bonus
         const lumpSum = liability * 0.10;
-        // Approximation of interest saved over 5 years
         const approxInterestSaved = lumpSum * rate/100 * 5; 
-        
         document.getElementById('debtStrategy1Amount').textContent = `Pay ${formatCurrencyShort(lumpSum)} from Bonus`;
         document.getElementById('debtStrategy1Savings').textContent = `Saves ~${formatCurrencyShort(approxInterestSaved)} in interest`;
-        
-        // Strategy 2: Monthly top up
-        const topUp = liability * 0.01; // adding 1% of loan value to EMI
+        const topUp = liability * 0.01;
         document.getElementById('debtStrategy2Amount').textContent = formatCurrencyShort(topUp);
-        
-        // Rough estimate impact
         const monthsReduced = currentCurrency === 'INR' ? "18-24" : "12-16";
         document.getElementById('debtStrategy2Impact').textContent = `Reduces tenure by ~${monthsReduced} months`;
     }
@@ -965,8 +979,8 @@
       const conf = getCurrencyConfig();
       
       if (incomeLog.length === 0) {
-          document.getElementById('kpiAvgNet').textContent = conf.symbol + '0';
-          document.getElementById('kpiLatestNet').textContent = conf.symbol + '0';
+          document.getElementById('kpiAvgIncome').textContent = conf.symbol + '0';
+          document.getElementById('kpiLatestIncome').textContent = conf.symbol + '0';
           document.getElementById('kpiLatestMonth').textContent = 'No Data';
           document.getElementById('kpiLatestBonus').textContent = conf.symbol + '0';
           document.getElementById('kpiBonusMonth').textContent = 'No Data';
@@ -978,7 +992,7 @@
           document.getElementById('incomeChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
           document.getElementById('yoyChartContainer').innerHTML = '<div class="text-slate-400 text-sm">No data to display</div>';
           
-          tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-500">No income data found. Log your first salary below.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-500">No income data found. Log your first salary below.</td></tr>`;
           return;
       }
 
@@ -988,22 +1002,25 @@
       const salaries = incomeLog.filter(i => i.type === 'salary');
       const bonuses = incomeLog.filter(i => i.type === 'bonus');
 
-      // Avg & Latest KPIs
+      // Avg & Latest KPIs based on Income Mode
       if (salaries.length > 0) {
         const last12 = salaries.slice(-12);
-        const avgNet = last12.reduce((acc, curr) => acc + curr.net, 0) / last12.length;
-        document.getElementById('kpiAvgNet').textContent = formatCurrencyShort(avgNet);
-        document.getElementById('kpiLatestNet').textContent = formatCurrencyShort(salaries[salaries.length - 1].net);
-        document.getElementById('kpiLatestMonth').textContent = salaries[salaries.length - 1].month;
+        const avgValue = last12.reduce((acc, curr) => acc + (curr[incomeMode] || curr.net), 0) / last12.length;
+        document.getElementById('kpiAvgIncome').textContent = formatCurrencyShort(avgValue);
+        
+        const latestSal = salaries[salaries.length - 1];
+        document.getElementById('kpiLatestIncome').textContent = formatCurrencyShort(latestSal[incomeMode] || latestSal.net);
+        document.getElementById('kpiLatestMonth').textContent = latestSal.month;
       } else {
-        document.getElementById('kpiAvgNet').textContent = conf.symbol + '0';
-        document.getElementById('kpiLatestNet').textContent = conf.symbol + '0';
+        document.getElementById('kpiAvgIncome').textContent = conf.symbol + '0';
+        document.getElementById('kpiLatestIncome').textContent = conf.symbol + '0';
         document.getElementById('kpiLatestMonth').textContent = 'No Data';
       }
       
       if (bonuses.length > 0) {
-        document.getElementById('kpiLatestBonus').textContent = formatCurrencyShort(bonuses[bonuses.length - 1].net);
-        document.getElementById('kpiBonusMonth').textContent = bonuses[bonuses.length - 1].month;
+        const latestBns = bonuses[bonuses.length - 1];
+        document.getElementById('kpiLatestBonus').textContent = formatCurrencyShort(latestBns[incomeMode] || latestBns.net);
+        document.getElementById('kpiBonusMonth').textContent = latestBns.month;
       } else {
         document.getElementById('kpiLatestBonus').textContent = conf.symbol + '0';
         document.getElementById('kpiBonusMonth').textContent = 'No Data';
@@ -1011,7 +1028,7 @@
       
       // YTD Calculation (Current Year)
       const currentYear = new Date().getFullYear().toString();
-      const ytdIncome = incomeLog.filter(i => i.month.startsWith(currentYear)).reduce((sum, item) => sum + item.net, 0);
+      const ytdIncome = incomeLog.filter(i => i.month.startsWith(currentYear)).reduce((sum, item) => sum + (item[incomeMode] || item.net), 0);
       document.getElementById('kpiYtdTotal').textContent = formatCurrencyShort(ytdIncome);
       document.getElementById('kpiYtdYear').textContent = currentYear + " YTD";
       if(document.getElementById('kpiYtdTotalMobile')) document.getElementById('kpiYtdTotalMobile').textContent = formatCurrencyShort(ytdIncome);
@@ -1029,6 +1046,7 @@
         tr.innerHTML = `
           <td class="p-3.5 font-semibold whitespace-nowrap">${row.month}</td>
           <td class="p-3.5 whitespace-nowrap">${typeBadge}</td>
+          <td class="p-3.5 font-medium text-slate-500 dark:text-slate-400 text-right whitespace-nowrap">${row.gross ? formatCurrency(row.gross) : '-'}</td>
           <td class="p-3.5 font-bold text-slate-800 dark:text-slate-100 text-right whitespace-nowrap">${formatCurrency(row.net)}</td>
           <td class="p-3.5 text-center">
             <button onclick="deleteIncomeEntry(${actualIdx})" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition active:scale-95"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
@@ -1051,8 +1069,9 @@
       const monthlyData = {};
       incomeLog.forEach(entry => {
           if (!monthlyData[entry.month]) monthlyData[entry.month] = { salary: 0, bonus: 0 };
-          if (entry.type === 'salary') monthlyData[entry.month].salary += entry.net;
-          if (entry.type === 'bonus') monthlyData[entry.month].bonus += entry.net;
+          const val = entry[incomeMode] || entry.net;
+          if (entry.type === 'salary') monthlyData[entry.month].salary += val;
+          if (entry.type === 'bonus') monthlyData[entry.month].bonus += val;
       });
 
       const labels = Object.keys(monthlyData).sort();
@@ -1105,8 +1124,9 @@
       incomeLog.forEach(entry => {
           const year = entry.month.substring(0, 4);
           if (!yearlyData[year]) yearlyData[year] = { salary: 0, bonus: 0 };
-          if (entry.type === 'salary') yearlyData[year].salary += entry.net;
-          if (entry.type === 'bonus') yearlyData[year].bonus += entry.net;
+          const val = entry[incomeMode] || entry.net;
+          if (entry.type === 'salary') yearlyData[year].salary += val;
+          if (entry.type === 'bonus') yearlyData[year].bonus += val;
       });
 
       const years = Object.keys(yearlyData).sort();
@@ -1162,6 +1182,7 @@
       const newEntry = {
         month: document.getElementById('formIncDate').value,
         type: document.getElementById('formIncType').value,
+        gross: parseFloat(document.getElementById('formIncGross').value) || 0,
         net: parseFloat(document.getElementById('formIncNet').value) || 0
       };
       
@@ -1183,6 +1204,7 @@
           submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Logged to Drive!</span>';
           lucide.createIcons();
           document.getElementById('formIncNet').value = '';
+          document.getElementById('formIncGross').value = '';
       } catch(err) {
           console.error(err);
           const existingIdx = incomeLog.findIndex(item => item.month === newEntry.month && item.type === newEntry.type);
@@ -1234,8 +1256,15 @@
           newEntry.b5 = parseFloat(document.getElementById('formB5').value) || 0;
       }
       
+      // CONFETTI ZERO DEBT EASTER EGG!
+      if (portfolio.length > 0) {
+          const lastEntry = portfolio[portfolio.length - 1];
+          if (lastEntry.liability > 0 && newEntry.liability === 0) {
+              confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#10b981', '#3b82f6', '#f59e0b'] });
+          }
+      }
+      
       try {
-          // Fire-and-forget POST to Google Script using no-cors (avoids browser preflight blocks)
           fetch(SCRIPT_URL, {
               method: 'POST',
               mode: 'no-cors',
