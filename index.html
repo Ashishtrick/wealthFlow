@@ -1549,11 +1549,11 @@
             const response = await fetch(SCRIPT_URL);
             const data = await response.json();
             
-            if(data.portfolio && data.portfolio.length > 0) {
+            if(data.portfolio) {
                 portfolio = data.portfolio;
                 localStorage.setItem('wealthflow_portfolio_v7', JSON.stringify(portfolio));
             }
-            if(data.income && data.income.length > 0) {
+            if(data.income) {
                 incomeLog = data.income;
                 localStorage.setItem('wealthflow_income_v7', JSON.stringify(incomeLog));
             }
