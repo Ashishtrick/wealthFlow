@@ -1670,10 +1670,30 @@
             document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 mr-2 transition-all";
             lucide.createIcons();
             
-            const response = await fetch(SCRIPT_URL);
+            const urlWithPin = SCRIPT_URL + "?pin=" + encodeURIComponent(savedPin);
+            const response = await fetch(urlWithPin, {
+                method: "GET",
+                redirect: "follow"
+            });
             const data = await response.json();
             
-            if(data.portfolio) {
+            if (data.status === "unauthorized") {
+                isOwner = false;
+                savedPin = null;
+                localStorage.removeItem('wealthflow_pin');
+                updateAuthUI();
+                alert("Incorrect PIN. You have been switched to Guest Mode.");
+                document.getElementById('syncStatus').innerHTML = '<i data-lucide="user" class="w-3.5 h-3.5 mr-1.5"></i> Guest Mode';
+                document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 mr-2 transition-all";
+                lucide.createIcons();
+                return;
+            }
+            
+            isOwner = true;
+            localStorage.setItem('wealthflow_pin', savedPin);
+            updateAuthUI();
+
+            if (data.portfolio) {
                 portfolio = data.portfolio;
                 localStorage.setItem('wealthflow_portfolio_v7', JSON.stringify(portfolio));
             }
