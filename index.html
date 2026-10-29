@@ -72,6 +72,11 @@
         <button id="currencyToggleMobile" class="sm:hidden p-2 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center" aria-label="Toggle Currency">
           <i data-lucide="coins" class="w-4 h-4"></i>
         </button>
+        
+        <!-- Auth Toggle -->
+        <button id="authToggleBtn" class="p-2 sm:p-2.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center" aria-label="Login">
+          <i data-lucide="lock" id="authIcon" class="w-4 h-4"></i>
+        </button>
         <!-- Settings/Wipe Data Button -->
         <button id="wipeDataBtn" class="p-2 sm:p-2.5 rounded-lg bg-rose-100 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900 transition flex items-center" aria-label="Wipe Data">
           <i data-lucide="power" class="w-4 h-4"></i>
@@ -568,6 +573,25 @@
           </div>
           
           <button id="saveBucketsBtn" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md transition active:scale-95">Save Preferences</button>
+      </div>
+  </div>
+
+  
+  <!-- Login Modal -->
+  <div id="loginModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 sm:p-8 max-w-sm w-full">
+          <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-blue-600 mb-4 mx-auto">
+              <i data-lucide="lock" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-xl font-bold text-center mb-2">Owner Login</h3>
+          <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 text-center mb-6">
+              Enter your PIN to sync your private Google Sheet data. Without it, you are in Guest Mode (local storage only).
+          </p>
+          <input type="password" id="pinInput" placeholder="Enter PIN" class="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 mb-6 text-center tracking-widest text-lg font-mono focus:ring-2 focus:ring-blue-500 outline-none" />
+          <div class="space-y-3">
+              <button id="loginSubmitBtn" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition active:scale-95">Unlock Sync</button>
+              <button id="loginCancelBtn" class="w-full py-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-sm transition active:scale-95">Cancel</button>
+          </div>
       </div>
   </div>
 
@@ -1187,12 +1211,14 @@
       };
       
       try {
-          fetch(SCRIPT_URL, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: "saveIncome", entry: newEntry })
-          });
+          if (isOwner && savedPin) {
+              fetch(SCRIPT_URL, {
+                  method: 'POST',
+                  mode: 'no-cors',
+                  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                  body: JSON.stringify({ action: "saveIncome", pin: savedPin, entry: newEntry })
+              });
+          }
           
           const existingIdx = incomeLog.findIndex(item => item.month === newEntry.month && item.type === newEntry.type);
           if (existingIdx >= 0) incomeLog[existingIdx] = newEntry;
@@ -1200,8 +1226,13 @@
 
           renderIncomeDashboard();
           
-          submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
-          submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Logged to Drive!</span>';
+          if (isOwner) {
+              submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
+              submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Logged to Drive!</span>';
+          } else {
+              submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-amber-500 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
+              submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Logged Offline (Guest)</span>';
+          }
           lucide.createIcons();
           document.getElementById('formIncNet').value = '';
           document.getElementById('formIncGross').value = '';
@@ -1265,20 +1296,27 @@
       }
       
       try {
-          fetch(SCRIPT_URL, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-              body: JSON.stringify({ action: "savePortfolio", entry: newEntry })
-          });
+          if (isOwner && savedPin) {
+              fetch(SCRIPT_URL, {
+                  method: 'POST',
+                  mode: 'no-cors',
+                  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                  body: JSON.stringify({ action: "savePortfolio", pin: savedPin, entry: newEntry })
+              });
+          }
           
           const existingIdx = portfolio.findIndex(item => item.date === newEntry.date);
           if (existingIdx >= 0) portfolio[existingIdx] = newEntry; else portfolio.push(newEntry);
           renderDashboard();
           evaluateAffordability();
           
-          submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
-          submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Saved to Drive!</span>';
+          if (isOwner) {
+              submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-emerald-600 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
+              submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Saved to Drive!</span>';
+          } else {
+              submitBtn.className = "w-full lg:w-auto px-6 py-3 sm:py-2.5 rounded-xl bg-amber-500 text-white text-sm sm:text-xs font-semibold transition flex items-center justify-center space-x-1.5";
+              submitBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Saved Offline (Guest)</span>';
+          }
           lucide.createIcons();
       } catch(err) {
           console.error(err);
@@ -1570,7 +1608,63 @@
     // FETCH DATA FROM GOOGLE SHEETS
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwdZ2wVB-ZItNW1kACFPFFclac4YRvEHmPIF6uWji2LaqhZnpANvyv6wXHHRydguXG4ow/exec';
     
+    let savedPin = localStorage.getItem('wealthflow_pin') || null;
+    let isOwner = false;
+
+    function updateAuthUI() {
+        const authIcon = document.getElementById('authIcon');
+        const syncBtn = document.getElementById('manualSyncBtn');
+        const syncStatus = document.getElementById('syncStatus');
+        
+        if (isOwner) {
+            authIcon.setAttribute('data-lucide', 'unlock');
+            authIcon.parentElement.classList.add('bg-emerald-100', 'dark:bg-emerald-900/50', 'text-emerald-600', 'dark:text-emerald-400');
+            syncBtn.classList.remove('hidden');
+        } else {
+            authIcon.setAttribute('data-lucide', 'lock');
+            authIcon.parentElement.classList.remove('bg-emerald-100', 'dark:bg-emerald-900/50', 'text-emerald-600', 'dark:text-emerald-400');
+            syncBtn.classList.add('hidden');
+            syncStatus.innerHTML = '<i data-lucide="user" class="w-3.5 h-3.5 mr-1.5"></i> Guest Mode';
+            syncStatus.className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 mr-2 transition-all";
+        }
+        lucide.createIcons();
+    }
+
+    document.getElementById('authToggleBtn').addEventListener('click', () => {
+        if (isOwner) {
+            if (confirm('Log out and switch to Guest Mode?')) {
+                isOwner = false;
+                savedPin = null;
+                localStorage.removeItem('wealthflow_pin');
+                updateAuthUI();
+                alert('Logged out. You are now in offline Guest Mode.');
+            }
+        } else {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+    });
+
+    document.getElementById('loginCancelBtn').addEventListener('click', () => {
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('pinInput').value = '';
+    });
+
+    document.getElementById('loginSubmitBtn').addEventListener('click', () => {
+        savedPin = document.getElementById('pinInput').value;
+        document.getElementById('loginModal').classList.add('hidden');
+        document.getElementById('pinInput').value = '';
+        syncFromDrive();
+    });
+
     async function syncFromDrive() {
+        if (!savedPin) {
+            isOwner = false;
+            updateAuthUI();
+            renderDashboard();
+            renderIncomeDashboard();
+            evaluateAffordability();
+            return; // Boot in guest mode, don't try to fetch
+        }
         try {
             document.getElementById('syncStatus').innerHTML = '<i data-lucide="loader-2" class="w-3.5 h-3.5 mr-1.5 animate-spin"></i> Syncing with ME...';
             document.getElementById('syncStatus').className = "hidden md:flex items-center text-[11px] font-bold px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400 mr-2 transition-all";
