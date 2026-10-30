@@ -655,6 +655,22 @@
     // --- Currency & Bucket Logic ---
     let currentCurrency = localStorage.getItem('wealthflow_currency') || 'JPY';
     
+    // FOREX INTEGRATION
+    let exchangeRate = 0.55; // Fallback 1 JPY = 0.55 INR
+    async function initForex() {
+        try {
+            const res = await fetch('https://open.er-api.com/v6/latest/JPY');
+            const data = await res.json();
+            if(data && data.rates && data.rates.INR) {
+                exchangeRate = data.rates.INR;
+                document.getElementById('currencyToggle').title = `Live Rate: 1 JPY = ${exchangeRate.toFixed(3)} INR`;
+                if (portfolio.length > 0) renderDashboard();
+                if (incomeLog.length > 0 && !document.getElementById('view-income').classList.contains('hidden')) renderIncomeDashboard();
+            }
+        } catch(e) { console.log("Forex fetch failed, using fallback."); }
+    }
+    initForex();
+    
     const defaultBucketsJPY = { b1: "Emergency Fund", b2: "NISA", b3: "ESOP", b4: "DC Pension", hasB5: false, b5: "Custom" };
     const defaultBucketsINR = { b1: "Liquid / FD", b2: "SIP / MF", b3: "ESOP", b4: "EPF / NPS", hasB5: false, b5: "Gold / SGB" };
     
@@ -671,19 +687,30 @@
             : { locale: 'en-IN', curr: 'INR', symbol: '₹', label: '₹ INR', fallbackK: 'k', defaultRate: 10.5 };
     }
 
-    function formatCurrency(val) {
+    function convertValue(val) {
+        return currentCurrency === 'INR' ? val * exchangeRate : val;
+    }
+
+    function formatCurrency(val, skipConvert = false) {
         const conf = getCurrencyConfig();
+        const converted = (skipConvert || currentCurrency === 'JPY') ? val : convertValue(val);
         return new Intl.NumberFormat(conf.locale, { style: 'currency', currency: conf.curr, maximumFractionDigits: 0 })
-                   .format(val).replace(conf.curr, conf.symbol);
+                   .format(converted).replace(conf.curr, conf.symbol);
     }
     
-    function formatCurrencyShort(val) {
+    function formatCurrencyShort(val, skipConvert = false) {
         const conf = getCurrencyConfig();
-        if(window.innerWidth < 640 && Math.abs(val) >= 10000) {
-            if(currentCurrency === 'INR' && Math.abs(val) >= 100000) return conf.symbol + (val / 100000).toFixed(1) + 'L';
-            return conf.symbol + (val / 1000).toFixed(0) + conf.fallbackK;
+        const converted = (skipConvert || currentCurrency === 'JPY') ? val : convertValue(val);
+        if(window.innerWidth < 640 && Math.abs(converted) >= 10000) {
+            if(currentCurrency === 'INR' && Math.abs(converted) >= 100000) return conf.symbol + (converted / 100000).toFixed(1) + 'L';
+            return conf.symbol + (converted / 1000).toFixed(0) + conf.fallbackK;
         }
-        return formatCurrency(val);
+        return formatCurrency(converted, true);
+    }
+    
+    function getBaseInput(id) {
+        let v = parseFloat(document.getElementById(id).value) || 0;
+        return currentCurrency === 'INR' ? v / exchangeRate : v;
     }
     
     function applyBucketLabels() {
@@ -931,9 +958,9 @@
 
       const isMobile = window.innerWidth < 768;
       const dates = portfolio.map(e => isMobile ? e.date.substring(5) : e.date);
-      const netWealths = portfolio.map(e => calculateMetrics(e).netWealth);
-      const totalAssets = portfolio.map(e => calculateMetrics(e).totalAssets);
-      const liabilities = portfolio.map(e => e.liability);
+      const netWealths = portfolio.map(e => convertValue(calculateMetrics(e).netWealth));
+      const totalAssets = portfolio.map(e => convertValue(calculateMetrics(e).totalAssets));
+      const liabilities = portfolio.map(e => convertValue(e.liability));
       
       const conf = getCurrencyConfig();
       const b = getBuckets();
@@ -958,7 +985,7 @@
           responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
-            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}` } }
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y, true)}` } }
           },
           scales: {
             y: { 
@@ -979,7 +1006,8 @@
       const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
       if (allocationChartInstance) allocationChartInstance.destroy();
       
-      const allocData = b.hasB5 ? [latest.b1, latest.b2, latest.b3, latest.b4, latest.b5 || 0] : [latest.b1, latest.b2, latest.b3, latest.b4];
+      const allocDataRaw = b.hasB5 ? [latest.b1, latest.b2, latest.b3, latest.b4, latest.b5 || 0] : [latest.b1, latest.b2, latest.b3, latest.b4];
+      const allocData = allocDataRaw.map(v => convertValue(v));
       const allocLabels = b.hasB5 ? [b.b1, b.b2, b.b3, b.b4, b.b5] : [b.b1, b.b2, b.b3, b.b4];
       const allocColors = b.hasB5 ? ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'] : ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6'];
       
@@ -988,7 +1016,7 @@
           allocationChartInstance = new Chart(ctxAlloc, {
             type: 'doughnut',
             data: { labels: allocLabels, datasets: [{ data: allocData, backgroundColor: allocColors, borderWidth: 2, borderColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#ffffff', hoverOffset: isMobile ? 2 : 4 }] },
-            options: { responsive: true, maintainAspectRatio: false, layout: { padding: 10 }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.label}: ${formatCurrency(ctx.parsed)} (${((ctx.parsed / totalAlloc) * 100).toFixed(1)}%)` } } }, cutout: isMobile ? '65%' : '72%' }
+            options: { responsive: true, maintainAspectRatio: false, layout: { padding: 10 }, plugins: { legend: { display: false }, tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.label}: ${formatCurrency(ctx.raw, true)} (${((ctx.parsed / totalAlloc) * 100).toFixed(1)}%)` } } }, cutout: isMobile ? '65%' : '72%' }
           });
           document.getElementById('allocationLegend').innerHTML = allocLabels.map((lbl, idx) => `<div class="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg"><span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: ${allocColors[idx]}"></span><div class="flex flex-col"><span class="text-slate-500 font-medium truncate max-w-[80px]" title="${lbl}">${lbl}</span><span class="font-bold text-slate-800 dark:text-slate-200">${((allocData[idx] / totalAlloc) * 100).toFixed(1)}%</span></div></div>`).join('');
       } else {
@@ -1102,8 +1130,8 @@
       const recentLabels = labels.slice(-12);
       
       const displayLabels = recentLabels.map(l => isMobile ? l.substring(5) : l);
-      const salaryData = recentLabels.map(l => monthlyData[l].salary);
-      const bonusData = recentLabels.map(l => monthlyData[l].bonus);
+      const salaryData = recentLabels.map(l => convertValue(monthlyData[l].salary));
+      const bonusData = recentLabels.map(l => convertValue(monthlyData[l].bonus));
 
       const ctx = document.getElementById('incomeChart').getContext('2d');
       if (incomeChartInstance) incomeChartInstance.destroy();
@@ -1121,7 +1149,7 @@
           responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
-            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}` } }
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y, true)}` } }
           },
           scales: {
             x: { stacked: true, grid: { display: false } },
@@ -1154,8 +1182,8 @@
       });
 
       const years = Object.keys(yearlyData).sort();
-      const salaryTotals = years.map(y => yearlyData[y].salary);
-      const bonusTotals = years.map(y => yearlyData[y].bonus);
+      const salaryTotals = years.map(y => convertValue(yearlyData[y].salary));
+      const bonusTotals = years.map(y => convertValue(yearlyData[y].bonus));
 
       const ctx = document.getElementById('yoyChart').getContext('2d');
       if (yoyChartInstance) yoyChartInstance.destroy();
@@ -1173,7 +1201,7 @@
           responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
           plugins: {
             legend: { position: 'top', labels: { boxWidth: 10, usePointStyle: true, pointStyle: 'circle' } },
-            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y)}` } }
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.9)', padding: 10, cornerRadius: 8, callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y, true)}` } }
           },
           scales: {
             x: { stacked: true, grid: { display: false } },
@@ -1206,8 +1234,8 @@
       const newEntry = {
         month: document.getElementById('formIncDate').value,
         type: document.getElementById('formIncType').value,
-        gross: parseFloat(document.getElementById('formIncGross').value) || 0,
-        net: parseFloat(document.getElementById('formIncNet').value) || 0
+        gross: getBaseInput('formIncGross'),
+        net: getBaseInput('formIncNet')
       };
       
       try {
@@ -1276,15 +1304,15 @@
       const b = getBuckets();
       const newEntry = {
         date: document.getElementById('formDate').value,
-        b1: parseFloat(document.getElementById('formB1').value) || 0,
-        b2: parseFloat(document.getElementById('formB2').value) || 0,
-        b3: parseFloat(document.getElementById('formB3').value) || 0,
-        b4: parseFloat(document.getElementById('formB4').value) || 0,
-        liability: parseFloat(document.getElementById('formLiability').value) || 0
+        b1: getBaseInput('formB1'),
+        b2: getBaseInput('formB2'),
+        b3: getBaseInput('formB3'),
+        b4: getBaseInput('formB4'),
+        liability: getBaseInput('formLiability')
       };
       
       if(b.hasB5) {
-          newEntry.b5 = parseFloat(document.getElementById('formB5').value) || 0;
+          newEntry.b5 = getBaseInput('formB5');
       }
       
       // CONFETTI ZERO DEBT EASTER EGG!
@@ -1363,7 +1391,8 @@
         }
         
         const name = document.getElementById('targetItemName').value.trim() || 'Target Item';
-        const cost = parseFloat(document.getElementById('targetItemCost').value) || 0;
+        const inputCost = parseFloat(document.getElementById('targetItemCost').value) || 0;
+        const cost = currentCurrency === 'INR' ? inputCost / exchangeRate : inputCost;
         const category = document.getElementById('targetItemCategory').value;
         const rate = parseFloat(document.getElementById('targetItemRate').value) || getCurrencyConfig().defaultRate;
         
