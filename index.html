@@ -1158,16 +1158,30 @@
             return;
         }
 
+        // Sort descending (newest first)
         const sortedPort = [...portfolio].sort((a, b) => new Date(b.date) - new Date(a.date));
-        const latestPort = sortedPort[0];
-        const prevPort = sortedPort[1];
         
-        // Get month (YYYY-MM) of latest portfolio entry
-        const latestPortMonth = latestPort.date.substring(0, 7);
-        
-        // Find matching income for that month
-        const monthIncome = incomeLog.filter(i => i.month === latestPortMonth);
-        if (monthIncome.length === 0) {
+        let latestPort = null;
+        let prevPort = null;
+        let monthIncome = [];
+        let latestPortMonth = '';
+
+        // Find the most recent portfolio entry that ALSO has a logged income for that same month
+        for (let i = 0; i < sortedPort.length - 1; i++) {
+            const candidatePort = sortedPort[i];
+            const candidateMonth = candidatePort.date.substring(0, 7);
+            
+            const matchingIncome = incomeLog.filter(inc => inc.month === candidateMonth);
+            if (matchingIncome.length > 0) {
+                latestPort = candidatePort;
+                prevPort = sortedPort[i + 1]; // The portfolio right before it
+                monthIncome = matchingIncome;
+                latestPortMonth = candidateMonth;
+                break;
+            }
+        }
+
+        if (!latestPort || !prevPort || monthIncome.length === 0) {
             container.style.display = 'none';
             return;
         }
