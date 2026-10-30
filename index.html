@@ -442,6 +442,43 @@
           <div class="mt-2 text-xl font-bold" id="kpiYtdTotalMobile">0</div>
         </section>
 
+        
+        <!-- Stealth Expense Tracker -->
+        <section class="glass-card rounded-2xl p-5 shadow-sm mt-6 mb-6" id="stealthTrackerContainer" style="display:none;">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-2">
+                    <div class="p-1.5 rounded-lg bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400"><i data-lucide="radar" class="w-4 h-4"></i></div>
+                    <div>
+                        <h2 class="text-sm font-bold">True Savings & Expense Radar</h2>
+                        <p class="text-[10px] text-slate-500">Implied cash flow for <span id="stealthMonth" class="font-semibold text-slate-700 dark:text-slate-300"></span></p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Savings Rate</div>
+                    <div class="text-xl font-bold text-emerald-600" id="stealthSavingsRate">0%</div>
+                </div>
+            </div>
+            
+            <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 mb-5 shadow-inner overflow-hidden">
+                <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-1000 ease-out" id="stealthProgressBar" style="width: 0%"></div>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2 border-t border-slate-100 dark:border-slate-800 pt-4">
+                <div class="text-center">
+                    <div class="text-[10px] text-slate-500 uppercase font-semibold">Income</div>
+                    <div class="text-sm font-bold mt-1 text-slate-800 dark:text-slate-100" id="stealthIncome">0</div>
+                </div>
+                <div class="text-center border-x border-slate-100 dark:border-slate-800">
+                    <div class="text-[10px] text-slate-500 uppercase font-semibold" title="Includes market gains/losses">Wealth Growth</div>
+                    <div class="text-sm font-bold mt-1 text-emerald-500" id="stealthDelta">+0</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-[10px] text-slate-500 uppercase font-semibold" title="Calculated automatically">Implied Expenses</div>
+                    <div class="text-sm font-bold mt-1 text-rose-500" id="stealthExpenses">0</div>
+                </div>
+            </div>
+        </section>
+
         <!-- Income Charts with Toggle -->
         <div class="flex justify-end mb-[-10px]">
             <div class="bg-slate-200 dark:bg-slate-800 rounded-lg p-1 flex text-xs font-semibold inline-flex relative z-10">
@@ -1109,7 +1146,78 @@
 
       renderIncomeChart();
       renderYoyChart();
+      updateStealthTracker();
       lucide.createIcons();
+    }
+
+    
+    function updateStealthTracker() {
+        const container = document.getElementById('stealthTrackerContainer');
+        if (!portfolio || portfolio.length < 2 || !incomeLog || incomeLog.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        const sortedPort = [...portfolio].sort((a, b) => new Date(b.date) - new Date(a.date));
+        const latestPort = sortedPort[0];
+        const prevPort = sortedPort[1];
+        
+        // Get month (YYYY-MM) of latest portfolio entry
+        const latestPortMonth = latestPort.date.substring(0, 7);
+        
+        // Find matching income for that month
+        const monthIncome = incomeLog.filter(i => i.month === latestPortMonth);
+        if (monthIncome.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+        
+        // Calculate RAW totals
+        const totalIncomeRaw = monthIncome.reduce((sum, item) => sum + (item[incomeMode] || item.net), 0);
+        const m1 = calculateMetrics(latestPort);
+        const m2 = calculateMetrics(prevPort);
+        
+        const deltaWealthRaw = m1.netWealth - m2.netWealth;
+        const impliedExpensesRaw = totalIncomeRaw - deltaWealthRaw;
+        
+        // Calculate percentages
+        let savingsRate = 0;
+        if (totalIncomeRaw > 0) {
+            savingsRate = (deltaWealthRaw / totalIncomeRaw) * 100;
+        }
+        
+        // Convert for display
+        const incDisp = convertValue(totalIncomeRaw);
+        const delDisp = convertValue(deltaWealthRaw);
+        const expDisp = convertValue(impliedExpensesRaw);
+
+        container.style.display = 'block';
+        document.getElementById('stealthMonth').textContent = latestPortMonth;
+        document.getElementById('stealthIncome').textContent = formatCurrencyShort(incDisp, true);
+        
+        const delElem = document.getElementById('stealthDelta');
+        delElem.textContent = (delDisp >= 0 ? '+' : '') + formatCurrencyShort(delDisp, true);
+        delElem.className = delDisp >= 0 ? 'text-sm font-bold mt-1 text-emerald-500' : 'text-sm font-bold mt-1 text-amber-500';
+        
+        document.getElementById('stealthExpenses').textContent = formatCurrencyShort(expDisp > 0 ? expDisp : 0, true);
+        
+        const srElement = document.getElementById('stealthSavingsRate');
+        srElement.textContent = savingsRate.toFixed(1) + '%';
+        
+        const fillPct = Math.max(0, Math.min(100, savingsRate));
+        const bar = document.getElementById('stealthProgressBar');
+        setTimeout(() => { bar.style.width = fillPct + '%'; }, 100);
+        
+        if (savingsRate >= 50) {
+            bar.className = 'bg-emerald-500 h-2.5 rounded-full transition-all duration-1000';
+            srElement.className = 'text-xl font-bold text-emerald-600 dark:text-emerald-400';
+        } else if (savingsRate >= 20) {
+            bar.className = 'bg-blue-500 h-2.5 rounded-full transition-all duration-1000';
+            srElement.className = 'text-xl font-bold text-blue-600 dark:text-blue-400';
+        } else {
+            bar.className = 'bg-amber-500 h-2.5 rounded-full transition-all duration-1000';
+            srElement.className = 'text-xl font-bold text-amber-500 dark:text-amber-400';
+        }
     }
 
     function renderIncomeChart() {
